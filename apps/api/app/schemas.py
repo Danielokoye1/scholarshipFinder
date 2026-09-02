@@ -230,6 +230,8 @@ class ScholarshipSummary(BaseModel):
     eligibility_status: EligibilityStatus
     eligibility_score: float
     automation_level: int
+    safety_status: Literal["approved", "review_required", "blocked"]
+    priority_score: float
     last_verified_at: datetime | None
     created_at: datetime
 
@@ -256,3 +258,175 @@ class EvaluationBatchResult(BaseModel):
     eligible: int
     ineligible: int
     needs_information: int
+
+
+ApplicationStatus = Literal[
+    "discovered",
+    "eligibility_check",
+    "ineligible",
+    "ready_to_apply",
+    "application_started",
+    "filling",
+    "needs_user_input",
+    "needs_essay",
+    "needs_2fa",
+    "needs_captcha",
+    "needs_recommendation",
+    "needs_signature",
+    "needs_review",
+    "ready_to_submit",
+    "submitting",
+    "submitted",
+    "submission_unconfirmed",
+    "failed",
+    "follow_up",
+    "awarded",
+    "rejected",
+    "expired",
+    "cancelled",
+]
+
+
+class ApplicationCreate(BaseModel):
+    scholarship_id: str = Field(min_length=1, max_length=36)
+    manual_effort_score: float = Field(default=0.5, ge=0, le=1)
+
+
+class ApplicationTransitionWrite(BaseModel):
+    to_status: ApplicationStatus
+    reason: str = Field(min_length=3, max_length=1000)
+    expected_version: int = Field(ge=1)
+
+
+class ApplicationEventRead(BaseModel):
+    id: str
+    from_status: str | None
+    to_status: str
+    reason: str
+    actor: str
+    metadata: dict[str, Any]
+    created_at: datetime
+
+
+class SafetyAssessmentRead(BaseModel):
+    id: str
+    scholarship_id: str
+    application_id: str | None
+    application_domain: str | None
+    status: Literal["approved", "review_required", "blocked"]
+    score: float
+    reasons: list[str]
+    is_current: bool
+    assessed_at: datetime
+
+
+class ManualTaskRead(BaseModel):
+    id: str
+    application_id: str | None
+    scholarship_id: str | None
+    category: str
+    title: str
+    required_action: str
+    status: Literal["open", "resolved", "dismissed"]
+    direct_url: str | None
+    priority_score: float
+    deadline: datetime | None
+    resolved_at: datetime | None
+    created_at: datetime
+
+
+class ManualTaskUpdate(BaseModel):
+    status: Literal["resolved", "dismissed"]
+
+
+class ApplicationSummary(BaseModel):
+    id: str
+    scholarship_id: str
+    scholarship_name: str
+    provider: str | None
+    award_max_cents: int | None
+    deadline: datetime | None
+    application_url: str | None
+    status: ApplicationStatus
+    safety_status: Literal["approved", "review_required", "blocked"]
+    automation_level: int
+    completion_percent: float
+    priority_score: float
+    manual_effort_score: float
+    submitted_at: datetime | None
+    version: int
+    updated_at: datetime
+
+
+class ApplicationList(BaseModel):
+    items: list[ApplicationSummary]
+    total: int
+    offset: int
+    limit: int
+
+
+class ApplicationDetail(ApplicationSummary):
+    eligibility_status: EligibilityStatus
+    current_safety_assessment: SafetyAssessmentRead | None
+    events: list[ApplicationEventRead]
+    tasks: list[ManualTaskRead]
+
+
+class DomainPolicyWrite(BaseModel):
+    domain: str = Field(min_length=3, max_length=253)
+    decision: Literal["approved", "blocked"]
+    notes: str = Field(min_length=3, max_length=2000)
+
+    @field_validator("domain")
+    @classmethod
+    def normalize_domain(cls, value: str) -> str:
+        domain = value.strip().casefold().removeprefix("www.").rstrip(".")
+        if "://" in domain or "/" in domain or not re.fullmatch(r"[a-z0-9.-]+", domain):
+            raise ValueError("Provide a hostname only, such as apply.example.org")
+        if ".." in domain or domain.startswith(".") or domain.endswith("."):
+            raise ValueError("Invalid domain")
+        return domain
+
+
+class DomainPolicyRead(BaseModel):
+    id: str
+    domain: str
+    decision: Literal["approved", "blocked"]
+    notes: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class PrioritySettingsRead(BaseModel):
+    eligibility_weight: float
+    award_weight: float
+    urgency_weight: float
+    completion_weight: float
+    effort_weight: float
+    award_reference_cents: int
+    urgency_window_days: int
+    updated_at: datetime
+
+
+class PrioritySettingsWrite(BaseModel):
+    eligibility_weight: float = Field(ge=0, le=1)
+    award_weight: float = Field(ge=0, le=1)
+    urgency_weight: float = Field(ge=0, le=1)
+    completion_weight: float = Field(ge=0, le=1)
+    effort_weight: float = Field(ge=0, le=1)
+    award_reference_cents: int = Field(ge=100, le=100_000_000)
+    urgency_window_days: int = Field(ge=1, le=365)
+
+    @model_validator(mode="after")
+    def at_least_one_weight(self) -> "PrioritySettingsWrite":
+        if not any(
+            (
+                self.eligibility_weight,
+                self.award_weight,
+                self.urgency_weight,
+                self.completion_weight,
+                self.effort_weight,
+            )
+        ):
+            raise ValueError("At least one priority weight must be greater than zero")
+        return self

@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
 
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["DOCUMENT_STORAGE_PATH"] = str(Path(__file__).parent / ".test-documents")
+os.environ["SCHOLARSHIP_FINDER_DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["SCHOLARSHIP_FINDER_DOCUMENT_STORAGE_PATH"] = str(
+    Path(__file__).parent / ".test-documents"
+)
 
 import pytest
 from fastapi.testclient import TestClient
@@ -31,4 +33,3 @@ def client():
         yield test_client
     app.dependency_overrides.clear()
     Base.metadata.drop_all(engine)
-

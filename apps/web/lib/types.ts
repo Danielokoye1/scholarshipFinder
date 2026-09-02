@@ -66,3 +66,152 @@ export type DocumentRecord = {
   created_at: string;
 };
 
+export type SafetyStatus = "approved" | "review_required" | "blocked";
+
+export type ScholarshipSummary = {
+  id: string;
+  canonical_name: string;
+  provider: string | null;
+  source_url: string;
+  application_url: string | null;
+  award_min_cents: number | null;
+  award_max_cents: number | null;
+  deadline: string | null;
+  deadline_timezone: string | null;
+  deadline_type: string;
+  legitimacy_status: "verified" | "likely_legitimate" | "review_required" | "blocked";
+  legitimacy_score: number;
+  eligibility_status: "eligible" | "probably_eligible" | "needs_information" | "ineligible";
+  eligibility_score: number;
+  automation_level: number;
+  safety_status: SafetyStatus;
+  priority_score: number;
+  last_verified_at: string | null;
+  created_at: string;
+};
+
+export type ScholarshipDetail = ScholarshipSummary & {
+  description: string | null;
+  award_description: string | null;
+  raw_deadline_text: string | null;
+  requirements: Record<string, unknown>;
+  legitimacy_signals: string[];
+  rules: Array<{
+    id: string;
+    requirement: string;
+    field_key: string | null;
+    operator: string;
+    expected_value: unknown;
+    confidence: number;
+    needs_review: boolean;
+    source_quote: string | null;
+  }>;
+  checks: Array<{
+    id: string;
+    rule_id: string;
+    requirement: string;
+    field_key: string | null;
+    profile_value: unknown;
+    result: "pass" | "fail" | "unknown" | "needs_verification";
+    evidence: string;
+    confidence: number;
+    evaluation_run_id: string;
+    is_current: boolean;
+    evaluated_at: string;
+  }>;
+};
+
+export type ScholarshipList = {
+  items: ScholarshipSummary[];
+  total: number;
+  offset: number;
+  limit: number;
+};
+
+export type SafetyAssessment = {
+  id: string;
+  scholarship_id: string;
+  application_id: string | null;
+  application_domain: string | null;
+  status: SafetyStatus;
+  score: number;
+  reasons: string[];
+  is_current: boolean;
+  assessed_at: string;
+};
+
+export type ManualTask = {
+  id: string;
+  application_id: string | null;
+  scholarship_id: string | null;
+  category: string;
+  title: string;
+  required_action: string;
+  status: "open" | "resolved" | "dismissed";
+  direct_url: string | null;
+  priority_score: number;
+  deadline: string | null;
+  resolved_at: string | null;
+  created_at: string;
+};
+
+export type ApplicationSummary = {
+  id: string;
+  scholarship_id: string;
+  scholarship_name: string;
+  provider: string | null;
+  award_max_cents: number | null;
+  deadline: string | null;
+  application_url: string | null;
+  status: string;
+  safety_status: SafetyStatus;
+  automation_level: number;
+  completion_percent: number;
+  priority_score: number;
+  manual_effort_score: number;
+  submitted_at: string | null;
+  version: number;
+  updated_at: string;
+};
+
+export type ApplicationDetail = ApplicationSummary & {
+  eligibility_status: ScholarshipSummary["eligibility_status"];
+  current_safety_assessment: SafetyAssessment | null;
+  events: Array<{
+    id: string;
+    from_status: string | null;
+    to_status: string;
+    reason: string;
+    actor: string;
+    metadata: Record<string, unknown>;
+    created_at: string;
+  }>;
+  tasks: ManualTask[];
+};
+
+export type ApplicationList = {
+  items: ApplicationSummary[];
+  total: number;
+  offset: number;
+  limit: number;
+};
+
+export type DomainPolicy = {
+  id: string;
+  domain: string;
+  decision: "approved" | "blocked";
+  notes: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PrioritySettings = {
+  eligibility_weight: number;
+  award_weight: number;
+  urgency_weight: number;
+  completion_weight: number;
+  effort_weight: number;
+  award_reference_cents: number;
+  urgency_window_days: number;
+  updated_at: string;
+};

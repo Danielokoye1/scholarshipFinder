@@ -1,6 +1,6 @@
 # Phase 2 opportunity intelligence API
 
-The interactive API reference is available at <http://127.0.0.1:8000/docs> while the app is running.
+The interactive API reference is available at <http://127.0.0.1:8217/docs> while the app is running.
 
 ## Ingest a structured scholarship
 

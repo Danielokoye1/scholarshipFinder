@@ -20,7 +20,11 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardResponse:
         db.scalars(
             select(ManualTask)
             .where(ManualTask.status == "open")
-            .order_by(ManualTask.deadline.asc(), ManualTask.created_at.asc())
+            .order_by(
+                ManualTask.priority_score.desc(),
+                ManualTask.deadline.is_(None),
+                ManualTask.deadline.asc(),
+            )
             .limit(6)
         )
     )
@@ -58,4 +62,3 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardResponse:
             for scholarship in deadlines
         ],
     )
-

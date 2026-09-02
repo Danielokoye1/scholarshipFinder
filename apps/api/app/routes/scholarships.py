@@ -15,6 +15,8 @@ from app.core.normalization import (
     normalized_label,
     scholarship_fingerprint,
 )
+from app.core.priority import refresh_priority
+from app.core.safety import persist_safety_assessment
 from app.db import get_db
 from app.config import settings
 from app.models import (
@@ -83,6 +85,8 @@ def summary(item: Scholarship) -> ScholarshipSummary:
         legitimacy_score=item.legitimacy_score,
         eligibility_status=item.eligibility_status,
         eligibility_score=item.eligibility_score,
+        safety_status=item.safety_status,
+        priority_score=item.priority_score,
         automation_level=item.automation_level,
         last_verified_at=item.last_verified_at,
         created_at=item.created_at,
@@ -202,6 +206,8 @@ def ingest_scholarship(
             db, duplicate.scholarship, source_url, payload.source_text, "discovery_source"
         )
         duplicate.scholarship.last_verified_at = datetime.now(UTC)
+        persist_safety_assessment(db, duplicate.scholarship)
+        refresh_priority(db, duplicate.scholarship)
         record_event(
             db,
             "scholarship.duplicate_detected",
@@ -270,6 +276,8 @@ def ingest_scholarship(
         )
     db.flush()
     evaluate_scholarship(db, scholarship)
+    persist_safety_assessment(db, scholarship)
+    refresh_priority(db, scholarship)
     record_event(db, "scholarship.ingested", f"Added {scholarship.canonical_name}")
     db.commit()
     return IngestResult(
@@ -328,6 +336,8 @@ def reevaluate_all(
     counts = {"eligible": 0, "ineligible": 0, "needs_information": 0}
     for scholarship in scholarships:
         evaluate_scholarship(db, scholarship)
+        persist_safety_assessment(db, scholarship)
+        refresh_priority(db, scholarship)
         counts[scholarship.eligibility_status] += 1
     record_event(db, "eligibility.batch_evaluated", f"Evaluated {len(scholarships)} scholarships")
     db.commit()
@@ -420,6 +430,8 @@ def reevaluate_scholarship(
     if scholarship is None:
         raise HTTPException(status_code=404, detail="Scholarship not found")
     evaluate_scholarship(db, scholarship)
+    persist_safety_assessment(db, scholarship)
+    refresh_priority(db, scholarship)
     record_event(db, "eligibility.evaluated", f"Evaluated {scholarship.canonical_name}")
     db.commit()
     return scholarship_detail(scholarship_id, db)

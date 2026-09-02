@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -k -n api,web -c cyan,green \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "cd apps/api && ../../.venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:api": "cd apps/api && ../../.venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8217",
     "dev:web": "npm --workspace @scholarship-finder/web run dev",
     "build": "npm --workspace @scholarship-finder/web run build",
     "lint": "npm --workspace @scholarship-finder/web run lint",
@@ -19,4 +19,3 @@
     "concurrently": "^9.2.1"
   }
 }
-

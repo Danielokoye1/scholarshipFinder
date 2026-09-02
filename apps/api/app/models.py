@@ -53,6 +53,12 @@ class LegitimacyStatus(str, enum.Enum):
     BLOCKED = "blocked"
 
 
+class SafetyStatus(str, enum.Enum):
+    APPROVED = "approved"
+    REVIEW_REQUIRED = "review_required"
+    BLOCKED = "blocked"
+
+
 class ProfileField(Base):
     __tablename__ = "profile_fields"
 
@@ -134,6 +140,8 @@ class Scholarship(Base):
     eligibility_status: Mapped[str] = mapped_column(String(40), default=EligibilityStatus.NEEDS_INFORMATION.value)
     eligibility_score: Mapped[float] = mapped_column(Float, default=0.0)
     automation_level: Mapped[int] = mapped_column(Integer, default=0)
+    safety_status: Mapped[str] = mapped_column(String(40), default=SafetyStatus.REVIEW_REQUIRED.value)
+    priority_score: Mapped[float] = mapped_column(Float, default=0.0)
     last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, onupdate=now_utc)
@@ -205,9 +213,70 @@ class Application(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     scholarship_id: Mapped[str] = mapped_column(ForeignKey("scholarships.id"))
     status: Mapped[str] = mapped_column(String(48), default="discovered", index=True)
+    safety_status: Mapped[str] = mapped_column(String(40), default=SafetyStatus.REVIEW_REQUIRED.value)
+    automation_level: Mapped[int] = mapped_column(Integer, default=0)
+    completion_percent: Mapped[float] = mapped_column(Float, default=0.0)
+    priority_score: Mapped[float] = mapped_column(Float, default=0.0, index=True)
+    manual_effort_score: Mapped[float] = mapped_column(Float, default=0.5)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     award_result_cents: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, onupdate=now_utc)
+
+
+class ApplicationEvent(Base):
+    __tablename__ = "application_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    application_id: Mapped[str] = mapped_column(ForeignKey("applications.id"), index=True)
+    from_status: Mapped[str | None] = mapped_column(String(48), nullable=True)
+    to_status: Mapped[str] = mapped_column(String(48))
+    reason: Mapped[str] = mapped_column(Text)
+    actor: Mapped[str] = mapped_column(String(40), default="system")
+    metadata_json: Mapped[Any] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, index=True)
+
+
+class DomainPolicy(Base):
+    __tablename__ = "domain_policies"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    domain: Mapped[str] = mapped_column(String(253), unique=True, index=True)
+    decision: Mapped[str] = mapped_column(String(20))
+    notes: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, onupdate=now_utc)
+
+
+class SafetyAssessment(Base):
+    __tablename__ = "safety_assessments"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    scholarship_id: Mapped[str] = mapped_column(ForeignKey("scholarships.id"), index=True)
+    application_id: Mapped[str | None] = mapped_column(ForeignKey("applications.id"), nullable=True, index=True)
+    policy_id: Mapped[str | None] = mapped_column(ForeignKey("domain_policies.id"), nullable=True)
+    application_domain: Mapped[str | None] = mapped_column(String(253), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(40))
+    score: Mapped[float] = mapped_column(Float)
+    reasons_json: Mapped[Any] = mapped_column(JSON, default=list)
+    is_current: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    assessed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
+class PrioritySettings(Base):
+    __tablename__ = "priority_settings"
+
+    id: Mapped[int] = mapped_column(primary_key=True, default=1)
+    eligibility_weight: Mapped[float] = mapped_column(Float, default=0.30)
+    award_weight: Mapped[float] = mapped_column(Float, default=0.25)
+    urgency_weight: Mapped[float] = mapped_column(Float, default=0.25)
+    completion_weight: Mapped[float] = mapped_column(Float, default=0.15)
+    effort_weight: Mapped[float] = mapped_column(Float, default=0.05)
+    award_reference_cents: Mapped[int] = mapped_column(Integer, default=2_000_000)
+    urgency_window_days: Mapped[int] = mapped_column(Integer, default=60)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, onupdate=now_utc)
 
 
@@ -216,10 +285,14 @@ class ManualTask(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     application_id: Mapped[str | None] = mapped_column(ForeignKey("applications.id"), nullable=True)
+    scholarship_id: Mapped[str | None] = mapped_column(ForeignKey("scholarships.id"), nullable=True, index=True)
     category: Mapped[str] = mapped_column(String(60))
     title: Mapped[str] = mapped_column(String(300))
     required_action: Mapped[str] = mapped_column(String(1000))
     status: Mapped[str] = mapped_column(String(24), default="open", index=True)
+    direct_url: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    priority_score: Mapped[float] = mapped_column(Float, default=0.0, index=True)
     deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, onupdate=now_utc)

@@ -3,10 +3,10 @@
 `scholarshipFinder` is a single-user local application. The browser UI talks to a localhost FastAPI service. The service is the only layer allowed to access the SQLite database and document vault.
 
 ```text
-Next.js UI (localhost:3000)
+Next.js UI (localhost:3217)
           |
           v
-FastAPI (127.0.0.1:8000)
+FastAPI (127.0.0.1:8217)
      |               |
      v               v
 SQLite database   Local document vault
@@ -41,6 +41,23 @@ Structured source record
 
 The ingestion boundary requires each rule to carry a quote that actually occurs in the captured source text. Low-confidence rules, unmapped fields, unsupported values, and missing profile information stop at `needs_verification` or `unknown`. They cannot become eligibility passes.
 
-Trusted domains are deny-by-default. An exact domain or its subdomains may be added to `TRUSTED_SOURCE_DOMAINS` after review; detecting no scam phrases by itself produces only `likely_legitimate`, never `verified`.
+Trusted discovery sources are deny-by-default. An exact domain or its subdomains may be added to `SCHOLARSHIP_FINDER_TRUSTED_SOURCE_DOMAINS` after review; detecting no scam phrases by itself produces only `likely_legitimate`, never `verified`.
+
+## Phase 3 guarded workflow
+
+An application workflow begins only after the stored eligibility result and a fresh destination safety assessment are read. Application destinations use a separate exact-hostname policy from discovery sources. A source-page hostname is never used as an application destination when the application URL is absent.
+
+```text
+Opportunity
+  -> deterministic eligibility result
+  -> fresh application destination assessment
+  -> ineligible | needs user input | needs safety review | ready to apply
+  -> explicit state transitions + append-only events
+  -> priority-ranked manual task queue
+```
+
+The `application_started`, `filling`, `ready_to_submit`, `submitting`, and `submitted` states are locked in Phase 3. This is an API constraint, not merely a disabled UI control.
+
+See `SAFETY_MODEL.md` for the threat model and `ISOLATION.md` for project boundaries.
 
 All dashboard values originate from database queries. Empty tables produce zero counts and empty lists—not fixtures.

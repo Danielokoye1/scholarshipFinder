@@ -9,9 +9,12 @@
 - Scholarship ingestion, normalized sources, deterministic deduplication, eligibility rules and evidence
 - Canonical URL cleanup, source hashes, legitimacy screening, and repeatable reevaluation
 
-## Phase 3 — workflow
+## Phase 3 — safe workflow (implemented)
 
-- Opportunity table, application state machine, action queue, prioritization
+- Opportunity table and detail review with safety evidence
+- Default-deny destination policy and sensitive-information checks
+- Application state machine, event trail, action queue, and transparent prioritization
+- API-level lock preventing browser preparation or submission states
 
 ## Phase 4–6 — guarded browser preparation
 

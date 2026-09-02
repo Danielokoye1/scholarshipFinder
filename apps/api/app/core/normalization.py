@@ -1,4 +1,5 @@
 import hashlib
+import ipaddress
 import json
 import re
 import unicodedata
@@ -51,9 +52,13 @@ def canonicalize_url(value: str) -> str:
     if hostname.startswith("www."):
         hostname = hostname[4:]
     port = parsed.port
-    netloc = hostname
+    try:
+        is_ipv6 = ipaddress.ip_address(hostname).version == 6
+    except ValueError:
+        is_ipv6 = False
+    netloc = f"[{hostname}]" if is_ipv6 else hostname
     if port and not ((scheme == "https" and port == 443) or (scheme == "http" and port == 80)):
-        netloc = f"{hostname}:{port}"
+        netloc = f"{netloc}:{port}"
 
     path = re.sub(r"/{2,}", "/", parsed.path or "/")
     if path != "/":
