@@ -91,6 +91,8 @@ export type ProfileOverview = {
   document_checks: Array<{
     document_id: string;
     document_type: string;
+    version: string;
+    is_latest: boolean;
     status: "readable" | "locked" | "no_text" | "missing" | "unsupported" | "too_large" | "unreadable";
     page_count: number | null;
   }>;

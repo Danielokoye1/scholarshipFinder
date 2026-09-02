@@ -17,6 +17,7 @@ from app.services import record_event
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt", ".png", ".jpg", ".jpeg"}
+SINGLE_CURRENT_DOCUMENT_TYPES = {"resume"}
 
 
 def safe_extension(filename: str) -> str:
@@ -77,8 +78,29 @@ async def upload_document(
         auto_upload_allowed=False,
         expires_at=expires_at,
     )
+    previous_approved = (
+        list(
+            db.scalars(
+                select(Document).where(
+                    Document.document_type == clean_type,
+                    Document.auto_upload_allowed.is_(True),
+                )
+            )
+        )
+        if clean_type in SINGLE_CURRENT_DOCUMENT_TYPES
+        else []
+    )
+    for previous in previous_approved:
+        previous.auto_upload_allowed = False
     db.add(item)
     record_event(db, "document.added", f"Document metadata added for {original_name}")
+    if previous_approved:
+        record_event(
+            db,
+            "document.approval_changed",
+            f"Automated upload was revoked for {len(previous_approved)} older {clean_type} document(s)",
+            "warning",
+        )
     db.commit()
     db.refresh(item)
     return item

@@ -1,3 +1,7 @@
+from app.core.profile_intelligence import LocalDocumentText, read_local_document
+from app.models import Document
+
+
 def field_from_overview(body: dict, field_key: str) -> dict:
     return next(
         field
@@ -115,7 +119,7 @@ def test_profile_review_flags_address_stored_as_residency(client):
 
     issue = next(item for item in overview["issues"] if item["code"] == "misplaced_address_in_residency")
     assert issue["severity"] == "error"
-    assert "address.street" in issue["field_keys"]
+    assert issue["field_keys"] == ["identity.residency"]
     assert field_from_overview(overview, "identity.residency")["label"] == "Residency status (not your address)"
 
 
@@ -166,5 +170,68 @@ def test_encrypted_pdf_is_not_decrypted_for_profile_intelligence(monkeypatch, tm
 
     assert result.status == "locked"
     assert result.text == ""
-from app.core.profile_intelligence import read_local_document
-from app.models import Document
+
+
+def test_new_document_version_revokes_older_upload_approval(client):
+    first = client.post(
+        "/api/documents",
+        files={"file": ("resume-v1.pdf", b"%PDF first", "application/pdf")},
+        data={"document_type": "resume", "version": "1"},
+    )
+    assert first.status_code == 201
+    approved = client.patch(
+        f"/api/documents/{first.json()['id']}/approval",
+        json={"auto_upload_allowed": True},
+    )
+    assert approved.status_code == 200
+
+    second = client.post(
+        "/api/documents",
+        files={"file": ("resume-wn26.pdf", b"%PDF second", "application/pdf")},
+        data={"document_type": "resume", "version": "WN26"},
+    )
+    assert second.status_code == 201
+    assert second.json()["auto_upload_allowed"] is False
+
+    documents = client.get("/api/documents").json()
+    by_version = {item["version"]: item for item in documents}
+    assert by_version["1"]["auto_upload_allowed"] is False
+    assert by_version["WN26"]["auto_upload_allowed"] is False
+
+    overview = client.get("/api/profile/overview").json()
+    resume_checks = [
+        item for item in overview["document_checks"] if item["document_type"] == "resume"
+    ]
+    assert next(item for item in resume_checks if item["version"] == "1")["is_latest"] is False
+    assert next(item for item in resume_checks if item["version"] == "WN26")["is_latest"] is True
+
+
+def test_profile_intelligence_uses_latest_resume_version(client, monkeypatch):
+    for version in ("1", "WN26"):
+        response = client.post(
+            "/api/documents",
+            files={"file": (f"resume-{version}.pdf", b"%PDF fixture", "application/pdf")},
+            data={"document_type": "resume", "version": version},
+        )
+        assert response.status_code == 201
+    profile = client.put(
+        "/api/profile/education.graduation_date",
+        json={"value": "Winter 2028", "status": "user_entered", "source": "User"},
+    )
+    assert profile.status_code == 200
+
+    def document_text(document):
+        term = "Fall" if document.version == "1" else "Winter"
+        return LocalDocumentText(
+            document=document,
+            status="readable",
+            text=f"Expected Graduation - {term} 2028",
+            page_count=1,
+        )
+
+    monkeypatch.setattr("app.core.profile_intelligence.read_local_document", document_text)
+    overview = client.get("/api/profile/overview").json()
+    codes = {item["code"] for item in overview["issues"]}
+
+    assert "graduation_corroborated" in codes
+    assert "graduation_conflict" not in codes

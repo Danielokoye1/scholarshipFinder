@@ -25,6 +25,8 @@ Changing a verified field in the interface changes its status to `user_entered`.
 
 PDF text is read in memory and discarded after each review. Extracted text is not written to the database, event log, or API response. The reader is limited by the document-vault size cap and a 50-page/300,000-character ceiling. Encrypted PDFs are reported as locked and are never decrypted or bypassed.
 
+When multiple resumes exist, only the newest stored version is used for profile corroboration. Older copies remain visible as history. Adding a new document version revokes automatic-upload approval from older documents of the same type, and the new version also starts unapproved.
+
 ## Address boundary
 
 The local checker can validate only structure: required components, state names, ZIP format, and basic field normalization. It cannot prove that a residence is real or deliverable. USPS, Google, Census, or another external address-verification service would require sending private address data outside the device and therefore is not connected. Such a feature must require a separate, explicit user decision.

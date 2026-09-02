@@ -98,7 +98,7 @@ export function ProfileWorkspace({ initial }: { initial: ProfileOverview }) {
               <article className={`profile-issue ${issue.severity}`} key={issue.code}>
                 <span className={`issue-marker ${issue.severity}`} aria-hidden="true" />
                 <div><strong>{issue.title}</strong><p>{issue.message}</p>{issue.evidence_sources.length ? <small>Evidence: {issue.evidence_sources.join(", ")}</small> : null}</div>
-                {issue.requires_confirmation ? <button className="button" type="button" onClick={() => applySuggestion(issue)}>Use suggestion</button> : null}
+                {issue.requires_confirmation ? <button className="button" type="button" onClick={() => applySuggestion(issue)}>Use {String(issue.suggested_value)}</button> : null}
               </article>
             ))}
           </div>
@@ -145,7 +145,7 @@ export function ProfileWorkspace({ initial }: { initial: ProfileOverview }) {
         <div className="panel-header"><div><h2>Document intelligence</h2><p>Files are read locally only for corroboration.</p></div></div>
         <div className="document-checks">
           {overview.document_checks.map((item) => (
-            <div key={item.document_id}><strong>{item.document_type}</strong><span className={`badge ${item.status === "readable" ? "verified" : "warning"}`}>{item.status.replace("_", " ")}</span><small>{item.page_count ? `${item.page_count} page${item.page_count === 1 ? "" : "s"}` : "Page count unavailable"}</small></div>
+            <div key={item.document_id}><strong>{item.document_type} <span className="document-version">{item.version}</span></strong><span className={`badge ${item.status === "readable" ? "verified" : "warning"}`}>{item.is_latest ? "current · " : "history · "}{item.status.replace("_", " ")}</span><small>{item.page_count ? `${item.page_count} page${item.page_count === 1 ? "" : "s"}` : "Page count unavailable"}</small></div>
           ))}
         </div>
       </section>

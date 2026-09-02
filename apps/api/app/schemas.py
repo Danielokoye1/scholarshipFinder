@@ -91,6 +91,8 @@ class ProfileReviewIssueRead(BaseModel):
 class ProfileDocumentCheckRead(BaseModel):
     document_id: str
     document_type: str
+    version: str
+    is_latest: bool
     status: Literal["readable", "locked", "no_text", "missing", "unsupported", "too_large", "unreadable"]
     page_count: int | None
 

@@ -10,6 +10,7 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Deterministic email, phone, state, ZIP, GPA, graduation, class-standing, and enrollment checks
 - Derived full-name and graduation-year facts only when their source fields are verified
 - A local document vault with checksums and explicit auto-upload approval
+- Safe document versioning that uses the newest profile source and revokes stale upload approvals
 - A database-driven dashboard (no fabricated production metrics)
 - Persistent automation controls, including pause and emergency stop
 - A durable activity log

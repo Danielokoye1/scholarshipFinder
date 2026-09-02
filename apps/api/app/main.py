@@ -23,7 +23,7 @@ from app.routes import (
 
 app = FastAPI(
     title="scholarshipFinder API",
-    version="0.6.1",
+    version="0.6.2",
     description="Private local workflow API with profile intelligence and immutable dry-run validation.",
 )
 allowed_origins = {settings.web_origin, "http://localhost:3217"}

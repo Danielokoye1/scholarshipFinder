@@ -299,11 +299,18 @@ def profile_review(db: Session) -> dict[str, Any]:
     fields = {item.field_key: item for item in db.scalars(select(ProfileField))}
     documents = list(db.scalars(select(Document).order_by(Document.created_at, Document.id)))
     document_texts = [read_local_document(document) for document in documents]
-    resume_text = "\n".join(
-        item.text
-        for item in document_texts
-        if item.status == "readable" and item.document.document_type == "resume"
+    latest_by_type: dict[str, str] = {}
+    for document in documents:
+        latest_by_type[document.document_type] = document.id
+    latest_resume = next(
+        (
+            item
+            for item in reversed(document_texts)
+            if item.document.document_type == "resume"
+        ),
+        None,
     )
+    resume_text = latest_resume.text if latest_resume and latest_resume.status == "readable" else ""
     normalized_resume = normalized_document_text(resume_text)
     issues: list[dict[str, Any]] = []
 
@@ -335,7 +342,7 @@ def profile_review(db: Session) -> dict[str, Any]:
                 "error",
                 "A mailing address may be in the wrong field",
                 "Residency status should describe your legal or student residency—not a street address. Review this value and place mailing details in the address section.",
-                ["identity.residency", "address.street"],
+                ["identity.residency"],
             )
         )
 
@@ -542,6 +549,8 @@ def profile_review(db: Session) -> dict[str, Any]:
         {
             "document_id": item.document.id,
             "document_type": item.document.document_type,
+            "version": item.document.version,
+            "is_latest": latest_by_type.get(item.document.document_type) == item.document.id,
             "status": item.status,
             "page_count": item.page_count,
         }
