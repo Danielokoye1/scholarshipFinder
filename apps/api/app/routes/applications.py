@@ -3,6 +3,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.priority import refresh_priority
+from app.browser.serialization import browser_run_read
 from app.core.safety import persist_safety_assessment
 from app.core.state_machine import (
     InvalidTransition,
@@ -13,6 +14,7 @@ from app.db import get_db
 from app.models import (
     Application,
     ApplicationEvent,
+    BrowserRun,
     ManualTask,
     SafetyAssessment,
     Scholarship,
@@ -157,11 +159,17 @@ def detail(db: Session, application: Application, scholarship: Scholarship) -> A
             .order_by(ManualTask.created_at, ManualTask.id)
         )
     )
+    latest_inspection = db.scalar(
+        select(BrowserRun)
+        .where(BrowserRun.application_id == application.id)
+        .order_by(BrowserRun.started_at.desc(), BrowserRun.id.desc())
+    )
     base = application_summary(application, scholarship).model_dump()
     return ApplicationDetail(
         **base,
         eligibility_status=scholarship.eligibility_status,
         current_safety_assessment=safety_read(current_safety),
+        latest_inspection=browser_run_read(db, latest_inspection) if latest_inspection else None,
         events=[
             ApplicationEventRead(
                 id=event.id,
@@ -386,4 +394,3 @@ def reassess_safety(
     record_event(db, "safety.reassessed", f"Reassessed {scholarship.canonical_name}")
     db.commit()
     return detail(db, application, scholarship)
-

@@ -16,9 +16,16 @@
 - Application state machine, event trail, action queue, and transparent prioritization
 - API-level lock preventing browser preparation or submission states
 
-## Phase 4–6 — guarded browser preparation
+## Phase 4 — guarded form inspection (implemented)
 
-- Playwright inspection, verified-field mapping, dry-run form filling, pre-submission validation
+- Fresh non-persistent Chrome context with no login state or personal data
+- HTTPS, same-origin, public-network, request-method, request-count, timeout, and content-size guards
+- Redacted field plans with deterministic profile-key mappings and manual barrier detection
+- Fake local application fixture proving that hidden values and blocked requests are not used
+
+## Phase 5–6 — guarded browser preparation
+
+- Verified-field dry-run filling and pre-submission validation
 
 ## Phase 7+ — controlled operation
 

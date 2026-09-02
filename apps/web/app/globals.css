@@ -196,6 +196,22 @@ td small { color: var(--muted); margin-top: 3px; }
 .weight-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px; }
 .weight-grid.secondary { grid-template-columns: repeat(2, minmax(180px, 260px)); }
 .priority-form .button { margin-top: 2px; }
+.inspection-action { max-width: 290px; }
+.inspection-action .form-message { color: var(--accent); font-size: 10px; text-align: right; }
+.inspection-panel .panel-header { align-items: flex-start; }
+.inspection-summary { display: grid; grid-template-columns: repeat(5, 1fr); border-bottom: 1px solid var(--line); background: #fafbfb; }
+.inspection-summary > div { display: grid; gap: 5px; padding: 13px 17px; border-right: 1px solid var(--line); }
+.inspection-summary > div:last-child { border: 0; }
+.inspection-summary span { color: var(--muted); font-size: 9px; letter-spacing: .05em; text-transform: uppercase; }
+.inspection-summary strong { font-size: 12px; text-transform: capitalize; }
+.status-text.completed { color: var(--accent); }
+.status-text.blocked, .status-text.failed { color: var(--danger); }
+.inspection-alert { margin: 14px 17px 0; }
+.barrier-row { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 13px 17px; border-bottom: 1px solid var(--line); }
+.barrier-row > span:first-child { color: var(--muted); font-size: 10px; font-weight: 700; margin-right: 4px; text-transform: uppercase; }
+.field-reason { color: var(--muted); max-width: 330px; line-height: 1.45; }
+.inspection-evidence { display: grid; grid-template-columns: 110px 1fr; gap: 7px 14px; padding: 13px 17px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+.inspection-evidence code { color: #47515c; overflow-wrap: anywhere; }
 
 @media (max-width: 1050px) {
   .metrics { grid-template-columns: repeat(4, 1fr); }
@@ -225,4 +241,8 @@ td small { color: var(--muted); margin-top: 3px; }
   .queue-list li { grid-template-columns: 45px 1fr; }
   .queue-actions { grid-column: 2; flex-wrap: wrap; }
   .domain-form, .weight-grid, .weight-grid.secondary { grid-template-columns: 1fr; }
+  .inspection-summary { grid-template-columns: 1fr 1fr; }
+  .inspection-panel .panel-header { align-items: stretch; flex-direction: column; gap: 12px; }
+  .inspection-action { max-width: none; justify-items: stretch; }
+  .inspection-evidence { grid-template-columns: 1fr; }
 }

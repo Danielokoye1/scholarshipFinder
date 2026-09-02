@@ -36,7 +36,19 @@ ALLOWED_TRANSITIONS = {
     "discovered": {"eligibility_check", "expired", "cancelled"},
     "eligibility_check": {"ineligible", "ready_to_apply", "needs_user_input", "needs_review", "expired"},
     "ineligible": {"eligibility_check", "cancelled"},
-    "ready_to_apply": {"application_started", "needs_review", "expired", "cancelled"},
+    "ready_to_apply": {
+        "application_started",
+        "needs_user_input",
+        "needs_essay",
+        "needs_2fa",
+        "needs_captcha",
+        "needs_recommendation",
+        "needs_signature",
+        "needs_review",
+        "failed",
+        "expired",
+        "cancelled",
+    },
     "application_started": {"filling", "needs_review", "failed", "cancelled"},
     "filling": {
         "needs_user_input",
@@ -69,7 +81,7 @@ ALLOWED_TRANSITIONS = {
 }
 
 DATA_ENTRY_STATES = {"application_started", "filling", "ready_to_submit", "submitting"}
-LOCKED_PHASE_3_STATES = {"application_started", "filling", "ready_to_submit", "submitting", "submitted"}
+LOCKED_BROWSER_ACTION_STATES = {"application_started", "filling", "ready_to_submit", "submitting", "submitted"}
 
 
 class InvalidTransition(ValueError):
@@ -94,8 +106,8 @@ def transition_application(
         raise InvalidTransition("Personal data entry is blocked until application safety is approved")
     if to_status in DATA_ENTRY_STATES and application.scholarship_id is None:
         raise InvalidTransition("The application has no scholarship record")
-    if enforce_phase_gate and to_status in LOCKED_PHASE_3_STATES:
-        raise InvalidTransition("Browser preparation and submission remain disabled in Phase 3")
+    if enforce_phase_gate and to_status in LOCKED_BROWSER_ACTION_STATES:
+        raise InvalidTransition("Form filling and submission remain disabled in Phase 4")
 
     previous = application.status
     application.status = to_status
@@ -125,4 +137,3 @@ def record_initial_state(db: Session, application: Application, reason: str) -> 
             metadata_json={},
         )
     )
-

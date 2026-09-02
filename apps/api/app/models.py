@@ -266,6 +266,59 @@ class SafetyAssessment(Base):
     assessed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
 
+class BrowserRun(Base):
+    __tablename__ = "browser_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    application_id: Mapped[str] = mapped_column(ForeignKey("applications.id"), index=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    adapter: Mapped[str] = mapped_column(String(80), default="generic_form")
+    start_url: Mapped[str] = mapped_column(String(2000))
+    final_url: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    initial_domain: Mapped[str] = mapped_column(String(253))
+    final_domain: Mapped[str | None] = mapped_column(String(253), nullable=True)
+    redirect_chain_json: Mapped[Any] = mapped_column(JSON, default=list)
+    page_title: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    response_status: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    page_content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    field_count: Mapped[int] = mapped_column(Integer, default=0)
+    required_field_count: Mapped[int] = mapped_column(Integer, default=0)
+    automatable_field_count: Mapped[int] = mapped_column(Integer, default=0)
+    automatable_percent: Mapped[float] = mapped_column(Float, default=0.0)
+    detected_barriers_json: Mapped[Any] = mapped_column(JSON, default=list)
+    blocked_requests_json: Mapped[Any] = mapped_column(JSON, default=list)
+    error_category: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
+class FormFieldPlan(Base):
+    __tablename__ = "form_field_plans"
+    __table_args__ = (
+        UniqueConstraint("browser_run_id", "ordinal", name="uq_form_field_plan_run_ordinal"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    browser_run_id: Mapped[str] = mapped_column(ForeignKey("browser_runs.id"), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("applications.id"), index=True)
+    ordinal: Mapped[int] = mapped_column(Integer)
+    form_index: Mapped[int] = mapped_column(Integer, default=0)
+    tag_name: Mapped[str] = mapped_column(String(20))
+    input_type: Mapped[str] = mapped_column(String(40))
+    label: Mapped[str] = mapped_column(String(500))
+    required: Mapped[bool] = mapped_column(Boolean, default=False)
+    disabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    autocomplete: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    profile_field_key: Mapped[str | None] = mapped_column(String(180), nullable=True)
+    mapping_confidence: Mapped[float] = mapped_column(Float, default=0.0)
+    profile_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    disposition: Mapped[str] = mapped_column(String(40))
+    reason: Mapped[str] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
 class PrioritySettings(Base):
     __tablename__ = "priority_settings"
 

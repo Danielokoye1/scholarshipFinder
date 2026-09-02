@@ -1,6 +1,7 @@
 import type {
   ApplicationDetail,
   ApplicationList,
+  BrowserRun,
   DashboardData,
   DocumentRecord,
   DomainPolicy,
@@ -41,6 +42,8 @@ export const api = {
   application: (id: string) => readJson<ApplicationDetail>(`/api/applications/${id}`),
   reassessApplication: (id: string) =>
     readJson<ApplicationDetail>(`/api/applications/${id}/reassess-safety`, { method: "POST" }),
+  inspectApplication: (id: string) =>
+    readJson<BrowserRun>(`/api/applications/${id}/inspect`, { method: "POST" }),
   tasks: () => readJson<ManualTask[]>("/api/tasks"),
   updateTask: (id: string, status: "resolved" | "dismissed") =>
     readJson<ManualTask>(`/api/tasks/${id}`, {

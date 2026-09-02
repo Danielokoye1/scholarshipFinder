@@ -56,7 +56,23 @@ Opportunity
   -> priority-ranked manual task queue
 ```
 
-The `application_started`, `filling`, `ready_to_submit`, `submitting`, and `submitted` states are locked in Phase 3. This is an API constraint, not merely a disabled UI control.
+## Phase 4 read-only browser boundary
+
+Phase 4 may inspect an approved application URL only after a fresh safety assessment and verified eligibility result. Each run uses a new non-persistent Chrome context with service workers, downloads, WebSockets, non-read-only methods, cross-host requests, private/reserved addresses, unusual ports, and excessive requests blocked. The approved hostname is pinned to the public address resolved before launch to reduce DNS-rebinding exposure.
+
+The browser collects form labels, element kinds, required status, autocomplete hints, challenge categories, a page hash, redacted destinations, and response status. It does not collect input values, option values, raw HTML, cookies, browser profiles, screenshots, or profile values.
+
+```text
+Fresh safety assessment
+  -> public HTTPS target validation
+  -> isolated read-only browser context
+  -> redacted field structure
+  -> deterministic profile-key mapping (references only)
+  -> manual checkpoint tasks
+  -> persisted BrowserRun + FormFieldPlan evidence
+```
+
+The `application_started`, `filling`, `ready_to_submit`, `submitting`, and `submitted` states remain locked in Phase 4. This is an API constraint, not merely a disabled UI control.
 
 See `SAFETY_MODEL.md` for the threat model and `ISOLATION.md` for project boundaries.
 

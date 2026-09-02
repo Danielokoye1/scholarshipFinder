@@ -25,11 +25,11 @@ Legitimacy, eligibility, and destination safety are intentionally separate:
 
 One passing status never implies another. An approval is a recorded user judgment, not a guarantee or a wildcard for subdomains.
 
-## Phase 3 hard boundary
+## Phase 4 hard boundary
 
-Phase 3 can create and organize a workflow, calculate priority, and request a manual review. It cannot prepare, fill, upload to, or submit a web form. Both the user interface and the API state machine enforce this boundary.
+Phase 4 can create and organize a workflow, calculate priority, request a manual review, and inspect the structure of an approved application form in a fresh browser context. It cannot type, select, click, upload, authenticate, preserve sessions, or submit. Both the user interface and the API state machine enforce this boundary.
 
-Before any later browser phase, the system must add redirect-chain inspection, certificate and hostname rechecks, form-action verification, changed-page detection, per-field sensitivity policies, screenshot/audit evidence, and a final pre-fill assessment. CAPTCHA, 2FA, recommendations, signatures, and submission confirmation remain manual gates.
+Before any later filling phase, the system must add form-action verification, dry-run writes against local fixtures, changed-page detection, per-field value redaction tests, document matching, screenshot retention controls, and a final pre-fill assessment. CAPTCHA, 2FA, recommendations, signatures, attestations, and submission confirmation remain manual gates.
 
 ## Safe review practice
 

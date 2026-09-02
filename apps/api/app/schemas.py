@@ -368,8 +368,58 @@ class ApplicationList(BaseModel):
 class ApplicationDetail(ApplicationSummary):
     eligibility_status: EligibilityStatus
     current_safety_assessment: SafetyAssessmentRead | None
+    latest_inspection: "BrowserRunRead | None" = None
     events: list[ApplicationEventRead]
     tasks: list[ManualTaskRead]
+
+
+class FormFieldPlanRead(BaseModel):
+    id: str
+    ordinal: int
+    form_index: int
+    tag_name: str
+    input_type: str
+    label: str
+    required: bool
+    disabled: bool
+    autocomplete: str | None
+    profile_field_key: str | None
+    mapping_confidence: float
+    profile_status: str | None
+    disposition: Literal[
+        "auto_answerable",
+        "missing_profile_data",
+        "manual_review",
+        "blocked_sensitive",
+        "not_applicable",
+    ]
+    reason: str
+
+
+class BrowserRunRead(BaseModel):
+    id: str
+    application_id: str
+    status: Literal["running", "completed", "blocked", "failed"]
+    adapter: str
+    start_url: str
+    final_url: str | None
+    initial_domain: str
+    final_domain: str | None
+    redirect_chain: list[str]
+    page_title: str | None
+    response_status: int | None
+    page_content_hash: str | None
+    field_count: int
+    required_field_count: int
+    automatable_field_count: int
+    automatable_percent: float
+    detected_barriers: list[str]
+    blocked_requests: list[dict[str, str]]
+    error_category: str | None
+    error_message: str | None
+    started_at: datetime
+    finished_at: datetime | None
+    fields: list[FormFieldPlanRead] = Field(default_factory=list)
 
 
 class DomainPolicyWrite(BaseModel):
@@ -430,3 +480,6 @@ class PrioritySettingsWrite(BaseModel):
         ):
             raise ValueError("At least one priority weight must be greater than zero")
         return self
+
+
+ApplicationDetail.model_rebuild()

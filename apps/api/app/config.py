@@ -14,6 +14,14 @@ class Settings(BaseSettings):
     eligibility_rule_confidence_threshold: float = 0.85
     duplicate_title_similarity_threshold: float = 0.86
     trusted_source_domains: str = ""
+    inspection_timeout_ms: int = 15_000
+    inspection_settle_ms: int = 750
+    inspection_max_fields: int = 250
+    inspection_max_requests: int = 200
+    inspection_max_html_bytes: int = 5_000_000
+    inspection_min_interval_seconds: int = 15
+    field_mapping_confidence_threshold: float = 0.9
+    browser_channel: str = "chrome"
 
     model_config = SettingsConfigDict(
         env_file=("../../.env", ".env"),

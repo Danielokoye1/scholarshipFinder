@@ -177,6 +177,7 @@ export type ApplicationSummary = {
 export type ApplicationDetail = ApplicationSummary & {
   eligibility_status: ScholarshipSummary["eligibility_status"];
   current_safety_assessment: SafetyAssessment | null;
+  latest_inspection: BrowserRun | null;
   events: Array<{
     id: string;
     from_status: string | null;
@@ -187,6 +188,49 @@ export type ApplicationDetail = ApplicationSummary & {
     created_at: string;
   }>;
   tasks: ManualTask[];
+};
+
+export type FormFieldPlan = {
+  id: string;
+  ordinal: number;
+  form_index: number;
+  tag_name: string;
+  input_type: string;
+  label: string;
+  required: boolean;
+  disabled: boolean;
+  autocomplete: string | null;
+  profile_field_key: string | null;
+  mapping_confidence: number;
+  profile_status: string | null;
+  disposition: "auto_answerable" | "missing_profile_data" | "manual_review" | "blocked_sensitive" | "not_applicable";
+  reason: string;
+};
+
+export type BrowserRun = {
+  id: string;
+  application_id: string;
+  status: "running" | "completed" | "blocked" | "failed";
+  adapter: string;
+  start_url: string;
+  final_url: string | null;
+  initial_domain: string;
+  final_domain: string | null;
+  redirect_chain: string[];
+  page_title: string | null;
+  response_status: number | null;
+  page_content_hash: string | null;
+  field_count: number;
+  required_field_count: number;
+  automatable_field_count: number;
+  automatable_percent: number;
+  detected_barriers: string[];
+  blocked_requests: Array<{ url: string; category: string; reason: string }>;
+  error_category: string | null;
+  error_message: string | null;
+  started_at: string;
+  finished_at: string | null;
+  fields: FormFieldPlan[];
 };
 
 export type ApplicationList = {

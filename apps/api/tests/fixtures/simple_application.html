@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><title>Fixture Scholarship Application</title></head>
+  <body>
+    <main>
+      <h1>Fixture Scholarship Application</h1>
+      <form>
+        <label>First name <input name="first_name" autocomplete="given-name" required></label>
+        <label>Email address <input type="email" name="email" autocomplete="email" required></label>
+        <label>Cumulative GPA <input name="gpa" required></label>
+        <label>Favorite subject <select name="favorite_subject" required><option>Engineering</option></select></label>
+        <label>Personal statement <textarea name="essay" required></textarea></label>
+        <label>Create password <input type="password" name="password" required></label>
+        <input type="hidden" name="csrf" value="must-never-be-stored">
+        <button type="submit">Submit application</button>
+      </form>
+      <iframe hidden src="https://example.com/embedded-tracker"></iframe>
+      <script>fetch('/write-beacon', {method: 'POST', body: 'must-not-send'}).catch(() => {});</script>
+    </main>
+  </body>
+</html>
