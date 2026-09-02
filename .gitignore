@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+.ruff_cache/
+node_modules/
+.next/
+coverage/
+storage/database/*.db
+storage/documents/*
+!storage/documents/.gitkeep
+storage/screenshots/*
+!storage/screenshots/.gitkeep

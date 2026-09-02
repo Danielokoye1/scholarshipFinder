@@ -1,0 +1,22 @@
+{
+  "name": "scholarship-finder",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c cyan,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd apps/api && ../../.venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:web": "npm --workspace @scholarship-finder/web run dev",
+    "build": "npm --workspace @scholarship-finder/web run build",
+    "lint": "npm --workspace @scholarship-finder/web run lint",
+    "test": "npm run test:api",
+    "test:api": "cd apps/api && ../../.venv/bin/pytest",
+    "setup": "python3 -m venv .venv && .venv/bin/pip install -e 'apps/api[dev]' && npm install && npm run migrate",
+    "migrate": "cd apps/api && ../../.venv/bin/alembic upgrade head"
+  },
+  "workspaces": [
+    "apps/web"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
+
