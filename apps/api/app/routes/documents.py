@@ -46,6 +46,7 @@ async def upload_document(
     stored_name = f"{document_id}-{clean_type}{extension}"
     storage = settings.document_storage_path.resolve()
     storage.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(storage, 0o700)
     target = storage / stored_name
     digest = hashlib.sha256()
     size = 0
@@ -99,4 +100,3 @@ def update_approval(
     db.commit()
     db.refresh(item)
     return item
-

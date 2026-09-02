@@ -8,9 +8,9 @@ import type { Settings } from "@/lib/types";
 const toggles: Array<[keyof Settings, string, string]> = [
   ["discovery_enabled", "Discovery", "Search approved sources on a schedule"],
   ["eligibility_enabled", "Eligibility checking", "Evaluate extracted rules against verified data"],
-  ["preparation_enabled", "Application preparation", "Allow inspection and offline synthetic filling in Dry Run mode"],
+  ["preparation_enabled", "Application preparation", "Allow inspection, offline filling, and validation in Dry Run mode"],
   ["automatic_submission_enabled", "Automatic submission", "Safety-gated until the controlled-submission phase"],
-  ["email_monitoring_enabled", "Email monitoring", "Not connected in Phase 5"],
+  ["email_monitoring_enabled", "Email monitoring", "Not connected in Phase 6"],
 ];
 
 export function SettingsPanel({ initial }: { initial: Settings }) {

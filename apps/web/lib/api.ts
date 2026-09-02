@@ -13,6 +13,7 @@ import type {
   ScholarshipDetail,
   ScholarshipList,
   Settings,
+  ValidationSnapshot,
 } from "./types";
 
 export const API_URL =
@@ -47,6 +48,8 @@ export const api = {
     readJson<BrowserRun>(`/api/applications/${id}/inspect`, { method: "POST" }),
   dryRunFill: (id: string) =>
     readJson<DryRunFill>(`/api/applications/${id}/dry-run-fill`, { method: "POST" }),
+  validateSubmission: (id: string) =>
+    readJson<ValidationSnapshot>(`/api/applications/${id}/validate-submission`, { method: "POST" }),
   tasks: () => readJson<ManualTask[]>("/api/tasks"),
   updateTask: (id: string, status: "resolved" | "dismissed") =>
     readJson<ManualTask>(`/api/tasks/${id}`, {

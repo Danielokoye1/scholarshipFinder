@@ -25,11 +25,13 @@ Legitimacy, eligibility, and destination safety are intentionally separate:
 
 One passing status never implies another. An approval is a recorded user judgment, not a guarantee or a wildcard for subdomains.
 
-## Phase 5 hard boundary
+The local API also rejects untrusted Host headers to reduce DNS-rebinding risk and rejects state-changing browser requests whose `Origin` is not the configured local UI. SQLite, document, and screenshot storage use owner-only filesystem permissions.
 
-Phase 5 can create and organize a workflow, calculate priority, request a manual review, inspect the structure of an approved application form in a fresh browser context, and test deterministic mappings inside a synthetic offline form. It cannot type into an external site, select external options, click external controls, upload, authenticate, preserve sessions, or submit. Both the user interface and the API state machine enforce this boundary.
+## Phase 6 hard boundary
 
-Before controlled submission, the system must add an immutable validator snapshot, changed-page detection, document matching, deadline and eligibility freshness checks, duplicate-submission locks, screenshot retention controls, and a final user-facing review. CAPTCHA, 2FA, recommendations, signatures, attestations, and submission confirmation remain manual gates.
+Phase 6 can create and organize a workflow, calculate priority, request a manual review, inspect the structure of an approved application form in a fresh browser context, test deterministic mappings inside a synthetic offline form, and create an immutable pre-submission validation snapshot. It cannot type into an external site, select external options, click external controls, upload, authenticate, preserve sessions, or submit. A passing snapshot is not submission authorization. Both the user interface and the API state machine enforce this boundary.
+
+Before controlled submission, the system still must add transactional duplicate-submission locks, secure session and credential handling, form-action verification, real-site dry-run review, screenshot retention controls, recovery checkpoints, a full dependency/local-storage audit, and an explicit live-mode activation ceremony. CAPTCHA, 2FA, recommendations, signatures, attestations, and submission confirmation remain manual gates.
 
 ## Safe review practice
 

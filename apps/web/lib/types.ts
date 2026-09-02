@@ -179,6 +179,7 @@ export type ApplicationDetail = ApplicationSummary & {
   current_safety_assessment: SafetyAssessment | null;
   latest_inspection: BrowserRun | null;
   latest_fill: DryRunFill | null;
+  latest_validation: ValidationSnapshot | null;
   events: Array<{
     id: string;
     from_status: string | null;
@@ -263,6 +264,25 @@ export type DryRunFill = {
   started_at: string;
   finished_at: string | null;
   fields: FillFieldEvidence[];
+};
+
+export type ValidationSnapshot = {
+  id: string;
+  application_id: string;
+  browser_run_id: string;
+  dry_run_fill_id: string;
+  safety_assessment_id: string;
+  status: "passed" | "blocked";
+  operating_mode: "dry_run";
+  source_page_hash: string;
+  fill_manifest_hash: string;
+  validation_manifest_hash: string;
+  eligibility_run_id: string | null;
+  checks: Array<{ code: string; status: "passed" | "blocked"; message: string }>;
+  blockers: Array<{ code: string; status: "blocked"; message: string }>;
+  profile_manifest: Array<Record<string, unknown>>;
+  document_manifest: Array<Record<string, unknown>>;
+  created_at: string;
 };
 
 export type ApplicationList = {

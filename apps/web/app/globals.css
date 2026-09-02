@@ -212,6 +212,12 @@ td small { color: var(--muted); margin-top: 3px; }
 .field-reason { color: var(--muted); max-width: 330px; line-height: 1.45; }
 .inspection-evidence { display: grid; grid-template-columns: 110px 1fr; gap: 7px 14px; padding: 13px 17px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
 .inspection-evidence code { color: #47515c; overflow-wrap: anywhere; }
+.validation-list { padding: 14px 17px; border-bottom: 1px solid var(--line); font-size: 12px; }
+.validation-list strong { display: block; margin-bottom: 5px; }
+.validation-list p { margin: 0; color: var(--muted); }
+.validation-list ul { margin: 6px 0 0; padding-left: 18px; line-height: 1.6; }
+.validation-list.blocked-list { background: var(--danger-soft); color: #8c251b; }
+.validation-list.passed-list { background: var(--accent-soft); color: #155849; }
 
 @media (max-width: 1050px) {
   .metrics { grid-template-columns: repeat(4, 1fr); }

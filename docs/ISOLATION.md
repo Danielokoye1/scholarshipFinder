@@ -7,9 +7,11 @@
 - Database: repository-local SQLite at `storage/database/scholarship_finder.db`
 - Documents: repository-local ignored files under `storage/documents/`
 - Network: API binds to `127.0.0.1:8217`; UI binds to `127.0.0.1:3217`
+- Request boundary: untrusted Host headers and cross-origin browser writes are rejected
 - Configuration: API variables use the `SCHOLARSHIP_FINDER_` prefix
 - Cloud services: no Supabase project, cloud database, cloud authentication, telemetry, or third-party storage is configured
 - Git: `.env`, the SQLite database, documents, and screenshots are ignored
+- Filesystem: database, document, and screenshot storage are owner-only (`0600` files / `0700` directories)
 
 The uncommon ports and prefixed environment names prevent accidental inheritance from generic variables such as `DATABASE_URL` or collision with projects using the usual 3000/8000 development ports.
 

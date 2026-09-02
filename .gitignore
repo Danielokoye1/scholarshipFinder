@@ -6,6 +6,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .ruff_cache/
+apps/api/tests/.test-documents/
 node_modules/
 .next/
 coverage/

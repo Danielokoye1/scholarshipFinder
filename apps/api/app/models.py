@@ -362,6 +362,27 @@ class FillFieldEvidence(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
 
+class ValidationSnapshot(Base):
+    __tablename__ = "validation_snapshots"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    application_id: Mapped[str] = mapped_column(ForeignKey("applications.id"), index=True)
+    browser_run_id: Mapped[str] = mapped_column(ForeignKey("browser_runs.id"), index=True)
+    dry_run_fill_id: Mapped[str] = mapped_column(ForeignKey("dry_run_fills.id"), index=True)
+    safety_assessment_id: Mapped[str] = mapped_column(ForeignKey("safety_assessments.id"))
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    operating_mode: Mapped[str] = mapped_column(String(32))
+    source_page_hash: Mapped[str] = mapped_column(String(64))
+    fill_manifest_hash: Mapped[str] = mapped_column(String(64))
+    validation_manifest_hash: Mapped[str] = mapped_column(String(64), index=True)
+    eligibility_run_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    checks_json: Mapped[Any] = mapped_column(JSON, default=list)
+    blockers_json: Mapped[Any] = mapped_column(JSON, default=list)
+    profile_manifest_json: Mapped[Any] = mapped_column(JSON, default=list)
+    document_manifest_json: Mapped[Any] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
 class PrioritySettings(Base):
     __tablename__ = "priority_settings"
 

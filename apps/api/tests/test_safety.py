@@ -68,3 +68,24 @@ def test_emergency_stop_must_be_cleared_before_resume(client):
     response = client.post("/api/system/resume")
     assert response.status_code == 409
 
+
+def test_hostile_web_origin_cannot_write_to_local_api(client):
+    response = client.post(
+        "/api/system/emergency-stop",
+        headers={"origin": "https://malicious.example"},
+    )
+    assert response.status_code == 403
+    assert "Cross-origin writes" in response.json()["detail"]
+
+
+def test_configured_local_web_origin_can_write(client):
+    response = client.post(
+        "/api/system/pause",
+        headers={"origin": "http://127.0.0.1:3217"},
+    )
+    assert response.status_code == 200
+
+
+def test_untrusted_host_header_is_rejected(client):
+    response = client.get("/health", headers={"host": "attacker.example"})
+    assert response.status_code == 400

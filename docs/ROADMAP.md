@@ -30,12 +30,18 @@
 - All network requests are blocked and no external site receives profile data
 - Evidence stores provenance and hashes rather than copied answer values
 
-## Phase 6 — pre-submission validation
+## Phase 6 — pre-submission validation (implemented)
 
-- Immutable intended-submission snapshots and complete safety regression gates
+- Immutable hashed snapshots of all dry-run evidence and decisions
+- Fresh eligibility, safety, legitimacy, deadline, page, profile, task, and document checks
+- Explicit safety regressions proving manual barriers and changed evidence block readiness
 
-## Phase 7+ — controlled operation
+## Phase 7 — controlled submission (intentionally locked)
 
-- Explicitly enabled submission, durable workers, response tracking, additional source adapters
+- Requires explicit user activation, verified real profile data, a security audit, browser recovery, screenshot retention controls, and real-site dry-run review
+
+## Phase 8+ — controlled operation
+
+- Durable workers, response tracking, email integration, and additional source adapters
 
 Live submission must remain unavailable until the safety regression suite, dry runs, recovery behavior, audit evidence, and emergency stop have all been validated.

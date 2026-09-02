@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.priority import refresh_priority
 from app.browser.serialization import browser_run_read
 from app.browser.fill_serialization import dry_run_fill_read
+from app.core.validation_serialization import validation_snapshot_read
 from app.core.safety import persist_safety_assessment
 from app.core.state_machine import (
     InvalidTransition,
@@ -20,6 +21,7 @@ from app.models import (
     ManualTask,
     SafetyAssessment,
     Scholarship,
+    ValidationSnapshot,
 )
 from app.schemas import (
     ApplicationCreate,
@@ -171,6 +173,11 @@ def detail(db: Session, application: Application, scholarship: Scholarship) -> A
         .where(DryRunFill.application_id == application.id)
         .order_by(DryRunFill.started_at.desc(), DryRunFill.id.desc())
     )
+    latest_validation = db.scalar(
+        select(ValidationSnapshot)
+        .where(ValidationSnapshot.application_id == application.id)
+        .order_by(ValidationSnapshot.created_at.desc(), ValidationSnapshot.id.desc())
+    )
     base = application_summary(application, scholarship).model_dump()
     return ApplicationDetail(
         **base,
@@ -178,6 +185,9 @@ def detail(db: Session, application: Application, scholarship: Scholarship) -> A
         current_safety_assessment=safety_read(current_safety),
         latest_inspection=browser_run_read(db, latest_inspection) if latest_inspection else None,
         latest_fill=dry_run_fill_read(db, latest_fill) if latest_fill else None,
+        latest_validation=(
+            validation_snapshot_read(latest_validation) if latest_validation else None
+        ),
         events=[
             ApplicationEventRead(
                 id=event.id,

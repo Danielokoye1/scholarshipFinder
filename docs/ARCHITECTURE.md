@@ -82,6 +82,12 @@ The durable evidence contains the canonical profile key, profile record identifi
 
 The live application states remain locked in Phase 5.
 
+## Phase 6 immutable validation boundary
+
+`POST /api/applications/{id}/validate-submission` reevaluates deterministic eligibility, recomputes destination safety, checks deadline semantics and legitimacy, requires the latest inspection and fill hashes to agree, verifies every profile hash and timestamp, resolves each required document to exactly one current approved file, and rejects unresolved tasks or browser barriers.
+
+Every run creates an immutable `ValidationSnapshot` containing pass/block decisions and hash-only profile/document manifests. A passing snapshot leaves the application in `ready_to_apply`; it does not transition to `ready_to_submit`. There is no submission endpoint, and the live data-entry states remain API-locked.
+
 See `SAFETY_MODEL.md` for the threat model and `ISOLATION.md` for project boundaries.
 
 All dashboard values originate from database queries. Empty tables produce zero counts and empty lists—not fixtures.

@@ -5,6 +5,7 @@ import { DryRunFillButton } from "@/components/dry-run-fill-button";
 import { InspectApplicationButton } from "@/components/inspect-application-button";
 import { PageHeading } from "@/components/page-heading";
 import { ReassessSafetyButton } from "@/components/reassess-safety-button";
+import { ValidateSubmissionButton } from "@/components/validate-submission-button";
 import { api } from "@/lib/api";
 
 const label = (value: string) => value.replaceAll("_", " ");
@@ -31,8 +32,10 @@ export default async function ApplicationDetailPage({
   const assessment = application.current_safety_assessment;
   const run = application.latest_inspection;
   const fill = application.latest_fill;
+  const validation = application.latest_validation;
   const canInspect = application.status === "ready_to_apply" && application.safety_status === "approved" && application.eligibility_status === "eligible";
   const canFill = canInspect && run?.status === "completed" && run.detected_barriers.length === 0;
+  const canValidate = canFill && fill?.status === "completed";
 
   return <div className="page detail-page">
     <PageHeading eyebrow="Application workflow" title={application.scholarship_name} description={`${application.provider ?? "Provider not recorded"} · version ${application.version}`} action={<ReassessSafetyButton applicationId={application.id} />} />
@@ -52,6 +55,16 @@ export default async function ApplicationDetailPage({
         {run.fields.length ? <div className="table-scroll"><table><thead><tr><th>Form field</th><th>Required</th><th>Profile mapping</th><th>Disposition</th><th>Reason</th></tr></thead><tbody>{run.fields.map((field) => <tr key={field.id}><td><strong>{field.label}</strong><small>{field.tag_name} · {field.input_type}</small></td><td>{field.required ? "Yes" : "No"}</td><td>{field.profile_field_key ? <><span className="mono">{field.profile_field_key}</span><small>{(field.mapping_confidence * 100).toFixed(0)}% mapping · {field.profile_status ?? "unknown"}</small></> : "—"}</td><td><span className={`badge ${dispositionClass(field.disposition)}`}>{label(field.disposition)}</span></td><td className="field-reason">{field.reason}</td></tr>)}</tbody></table></div> : <div className="empty-state compact"><span>0</span><strong>No form fields recorded</strong><p>{run.status === "completed" ? "The page may not contain a standard application form." : "Review the inspection error and destination."}</p></div>}
         <div className="inspection-evidence"><span>Final destination</span><code>{run.final_url ?? run.start_url}</code><span>Page hash</span><code>{run.page_content_hash ?? "Unavailable"}</code></div>
       </> : <div className="empty-state"><span>⌕</span><strong>Form not inspected</strong><p>Once safety and eligibility are approved, run a fresh read-only inspection to identify required fields and manual checkpoints.</p></div>}
+    </section>
+
+    <section className="panel inspection-panel">
+      <div className="panel-header"><div><h2>Pre-submission validation</h2><p>Immutable dry-run snapshot; passing does not authorize or perform submission</p></div><ValidateSubmissionButton applicationId={application.id} enabled={canValidate} /></div>
+      {validation ? <>
+        <div className="inspection-summary"><div><span>Decision</span><strong className={`status-text ${validation.status === "passed" ? "completed" : "blocked"}`}>{validation.status}</strong></div><div><span>Checks</span><strong>{validation.checks.length}</strong></div><div><span>Blockers</span><strong>{validation.blockers.length}</strong></div><div><span>Documents selected</span><strong>{validation.document_manifest.length}</strong></div><div><span>Validated</span><strong>{new Date(validation.created_at).toLocaleString()}</strong></div></div>
+        {validation.blockers.length ? <div className="validation-list blocked-list"><strong>Submission remains blocked</strong><ul>{validation.blockers.map((item) => <li key={item.code}>{item.message}</li>)}</ul></div> : <div className="validation-list passed-list"><strong>All dry-run checks passed</strong><p>The system still cannot fill a live site or submit. Phase 7 remains locked.</p></div>}
+        <div className="table-scroll"><table><thead><tr><th>Check</th><th>Result</th><th>Evidence</th></tr></thead><tbody>{validation.checks.map((check) => <tr key={check.code}><td><span className="mono">{label(check.code)}</span></td><td><span className={`badge ${check.status === "passed" ? "verified" : "blocked"}`}>{check.status}</span></td><td className="field-reason">{check.message}</td></tr>)}</tbody></table></div>
+        <div className="inspection-evidence"><span>Validation hash</span><code>{validation.validation_manifest_hash}</code><span>Fill manifest</span><code>{validation.fill_manifest_hash}</code></div>
+      </> : <div className="empty-state"><span>✓</span><strong>Not yet validated</strong><p>After an offline fill succeeds, run the immutable safety validator. This does not unlock submission.</p></div>}
     </section>
 
     <section className="panel inspection-panel">

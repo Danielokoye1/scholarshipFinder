@@ -1,6 +1,6 @@
 # scholarshipFinder
 
-A private, local-first scholarship workflow system. The project is intentionally being built in guarded vertical phases; the current implementation includes **Phases 1–5**.
+A private, local-first scholarship workflow system. The project is intentionally being built in guarded vertical phases; the current implementation includes **Phases 1–6**.
 
 ## What works now
 
@@ -27,8 +27,11 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Offline synthetic form filling using only verified canonical profile fields
 - Per-field provenance, freshness timestamps, and value hashes without duplicating raw answers
 - Idempotent dry-run evidence tied to the exact inspected page hash
+- Immutable pre-submission validation snapshots with explicit pass/block evidence
+- Fresh deadline, legitimacy, eligibility, safety, page, profile, task, and document checks
+- Regression gates for changed pages, expired deadlines, ambiguous documents, and manual checkpoints
 
-No real scholarship application can be filled or submitted by this version. The operating mode defaults to `DISCOVERY_ONLY`; Phase 5 can inspect an approved page and test verified mappings in an offline synthetic form, while live-site filling and submission transitions remain hard-locked in the API.
+No real scholarship application can be filled or submitted by this version. The operating mode defaults to `DISCOVERY_ONLY`; Phase 6 can inspect an approved page, test verified mappings in an offline synthetic form, and validate a hashed dry-run snapshot. Live-site filling and submission transitions remain hard-locked in the API.
 
 ## Requirements
 
@@ -64,8 +67,9 @@ npm run migrate
 - The API binds to loopback by default.
 - External browser use remains read-only: no profile values, cookies, login state, uploads, clicks, form writes, or submissions.
 - Phase 5 fill tests occur only in locally generated, script-free pages with all network requests blocked.
+- A passing Phase 6 validation is evidence only; it does not authorize, unlock, or attempt submission.
 - Every distinct application domain starts unapproved; listing-page trust never substitutes for a verified application destination.
 - HTTPS, direct-IP, unusual-port, payment, banking, identity, and signature rules are checked before a workflow can become ready.
 - Supabase and other cloud services are intentionally not connected. Data remains in this repository's ignored `storage/` tree.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SAFETY_MODEL.md](docs/SAFETY_MODEL.md), [docs/ISOLATION.md](docs/ISOLATION.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), [docs/PHASE_3_API.md](docs/PHASE_3_API.md), [docs/PHASE_4_API.md](docs/PHASE_4_API.md), [docs/PHASE_5_API.md](docs/PHASE_5_API.md), and [docs/ROADMAP.md](docs/ROADMAP.md).
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SAFETY_MODEL.md](docs/SAFETY_MODEL.md), [docs/ISOLATION.md](docs/ISOLATION.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), [docs/PHASE_3_API.md](docs/PHASE_3_API.md), [docs/PHASE_4_API.md](docs/PHASE_4_API.md), [docs/PHASE_5_API.md](docs/PHASE_5_API.md), [docs/PHASE_6_API.md](docs/PHASE_6_API.md), [docs/SECURITY_AUDIT_PHASE_6.md](docs/SECURITY_AUDIT_PHASE_6.md), and [docs/ROADMAP.md](docs/ROADMAP.md).

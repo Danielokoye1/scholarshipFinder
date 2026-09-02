@@ -370,6 +370,7 @@ class ApplicationDetail(ApplicationSummary):
     current_safety_assessment: SafetyAssessmentRead | None
     latest_inspection: "BrowserRunRead | None" = None
     latest_fill: "DryRunFillRead | None" = None
+    latest_validation: "ValidationSnapshotRead | None" = None
     events: list[ApplicationEventRead]
     tasks: list[ManualTaskRead]
 
@@ -452,6 +453,25 @@ class DryRunFillRead(BaseModel):
     started_at: datetime
     finished_at: datetime | None
     fields: list[FillFieldEvidenceRead] = Field(default_factory=list)
+
+
+class ValidationSnapshotRead(BaseModel):
+    id: str
+    application_id: str
+    browser_run_id: str
+    dry_run_fill_id: str
+    safety_assessment_id: str
+    status: Literal["passed", "blocked"]
+    operating_mode: Literal["dry_run"]
+    source_page_hash: str
+    fill_manifest_hash: str
+    validation_manifest_hash: str
+    eligibility_run_id: str | None
+    checks: list[dict[str, str]]
+    blockers: list[dict[str, str]]
+    profile_manifest: list[dict[str, Any]]
+    document_manifest: list[dict[str, Any]]
+    created_at: datetime
 
 
 class DomainPolicyWrite(BaseModel):
