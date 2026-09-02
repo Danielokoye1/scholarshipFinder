@@ -23,8 +23,8 @@ from app.routes import (
 
 app = FastAPI(
     title="scholarshipFinder API",
-    version="0.6.0",
-    description="Private local workflow API with immutable dry-run pre-submission validation.",
+    version="0.6.1",
+    description="Private local workflow API with profile intelligence and immutable dry-run validation.",
 )
 allowed_origins = {settings.web_origin, "http://localhost:3217"}
 app.add_middleware(

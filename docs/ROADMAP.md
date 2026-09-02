@@ -36,6 +36,13 @@
 - Fresh eligibility, safety, legitimacy, deadline, page, profile, task, and document checks
 - Explicit safety regressions proving manual barriers and changed evidence block readiness
 
+## Profile intelligence hardening (implemented)
+
+- Grouped multi-input profile review with deterministic format normalization
+- Local-only document corroboration and visible conflict handling
+- Verified-source derivation for full name and graduation year
+- Structural address checks with external deliverability verification intentionally disconnected
+
 ## Phase 7 — controlled submission (intentionally locked)
 
 - Requires explicit user activation, verified real profile data, a security audit, browser recovery, screenshot retention controls, and real-site dry-run review

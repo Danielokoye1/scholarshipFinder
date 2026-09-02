@@ -5,6 +5,10 @@ A private, local-first scholarship workflow system. The project is intentionally
 ## What works now
 
 - A canonical profile whose values carry verification status and provenance
+- A grouped profile-intelligence workspace with multi-field validation and explicit review
+- Local resume corroboration with no extracted document text stored in the database
+- Deterministic email, phone, state, ZIP, GPA, graduation, class-standing, and enrollment checks
+- Derived full-name and graduation-year facts only when their source fields are verified
 - A local document vault with checksums and explicit auto-upload approval
 - A database-driven dashboard (no fabricated production metrics)
 - Persistent automation controls, including pause and emergency stop
@@ -61,6 +65,9 @@ npm run migrate
 ## Safety boundaries
 
 - Unknown profile data remains unknown; it is never inferred.
+- Conflicting document and profile values become review items; neither side silently overwrites the other.
+- Encrypted PDFs are never decrypted or bypassed for profile analysis.
+- Address checks remain structural and local; no private address is sent to an external verification service.
 - Only `verified` or `user_entered` profile values may eventually be considered for form filling.
 - Documents cannot be auto-uploaded unless explicitly approved.
 - Secrets and document contents are excluded from Git.
@@ -72,4 +79,4 @@ npm run migrate
 - HTTPS, direct-IP, unusual-port, payment, banking, identity, and signature rules are checked before a workflow can become ready.
 - Supabase and other cloud services are intentionally not connected. Data remains in this repository's ignored `storage/` tree.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SAFETY_MODEL.md](docs/SAFETY_MODEL.md), [docs/ISOLATION.md](docs/ISOLATION.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), [docs/PHASE_3_API.md](docs/PHASE_3_API.md), [docs/PHASE_4_API.md](docs/PHASE_4_API.md), [docs/PHASE_5_API.md](docs/PHASE_5_API.md), [docs/PHASE_6_API.md](docs/PHASE_6_API.md), [docs/SECURITY_AUDIT_PHASE_6.md](docs/SECURITY_AUDIT_PHASE_6.md), and [docs/ROADMAP.md](docs/ROADMAP.md).
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SAFETY_MODEL.md](docs/SAFETY_MODEL.md), [docs/PROFILE_INTELLIGENCE.md](docs/PROFILE_INTELLIGENCE.md), [docs/ISOLATION.md](docs/ISOLATION.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), [docs/PHASE_3_API.md](docs/PHASE_3_API.md), [docs/PHASE_4_API.md](docs/PHASE_4_API.md), [docs/PHASE_5_API.md](docs/PHASE_5_API.md), [docs/PHASE_6_API.md](docs/PHASE_6_API.md), [docs/SECURITY_AUDIT_PHASE_6.md](docs/SECURITY_AUDIT_PHASE_6.md), and [docs/ROADMAP.md](docs/ROADMAP.md).

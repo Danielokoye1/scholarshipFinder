@@ -9,6 +9,7 @@ import type {
   ManualTask,
   PrioritySettings,
   ProfileField,
+  ProfileOverview,
   SafetyAssessment,
   ScholarshipDetail,
   ScholarshipList,
@@ -31,6 +32,7 @@ async function readJson<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   dashboard: () => readJson<DashboardData>("/api/dashboard"),
   profile: () => readJson<ProfileField[]>("/api/profile"),
+  profileOverview: () => readJson<ProfileOverview>("/api/profile/overview"),
   documents: () => readJson<DocumentRecord[]>("/api/documents"),
   scholarships: () => readJson<ScholarshipList>("/api/scholarships"),
   scholarship: (id: string) => readJson<ScholarshipDetail>(`/api/scholarships/${id}`),
@@ -87,6 +89,12 @@ export const api = {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+    }),
+  updateProfileOverview: (items: Array<{ field_key: string; value: unknown; status: string; source: string | null }>) =>
+    readJson<ProfileOverview>("/api/profile/overview", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
     }),
   uploadDocument: (body: FormData) =>
     readJson<DocumentRecord>("/api/documents", { method: "POST", body }),

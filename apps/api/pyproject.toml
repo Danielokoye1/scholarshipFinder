@@ -4,14 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scholarship-finder-api"
-version = "0.6.0"
-description = "Local API for scholarshipFinder"
+version = "0.6.1"
+description = "Local API and multi-source profile intelligence for scholarshipFinder"
 requires-python = ">=3.11"
 dependencies = [
   "alembic>=1.14,<2",
   "fastapi>=0.115,<1",
   "pydantic-settings>=2.7,<3",
   "playwright>=1.52,<2",
+  "pypdf>=6.0,<7",
   "python-multipart>=0.0.20,<1",
   "sqlalchemy>=2.0,<3",
   "uvicorn[standard]>=0.34,<1"

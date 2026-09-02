@@ -53,6 +53,51 @@ export type ProfileField = {
   updated_at: string;
 };
 
+export type ProfileWorkspaceField = {
+  field_key: string;
+  label: string;
+  value: unknown;
+  status: "verified" | "user_entered" | "unknown";
+  source: string | null;
+  last_verified_at: string | null;
+  input_type: string;
+  options: string[];
+  important: boolean;
+  sensitive: boolean;
+  help_text: string;
+};
+
+export type ProfileReviewIssue = {
+  code: string;
+  severity: "success" | "info" | "warning" | "error";
+  title: string;
+  message: string;
+  field_keys: string[];
+  evidence_sources: string[];
+  suggested_value: unknown;
+  requires_confirmation: boolean;
+};
+
+export type ProfileOverview = {
+  completeness_percent: number;
+  important_fields_complete: number;
+  important_fields_total: number;
+  sections: Array<{
+    key: string;
+    title: string;
+    fields: ProfileWorkspaceField[];
+  }>;
+  issues: ProfileReviewIssue[];
+  document_checks: Array<{
+    document_id: string;
+    document_type: string;
+    status: "readable" | "locked" | "no_text" | "missing" | "unsupported" | "too_large" | "unreadable";
+    page_count: number | null;
+  }>;
+  external_address_verification: "not_performed";
+  generated_at: string;
+};
+
 export type DocumentRecord = {
   id: string;
   original_filename: string;

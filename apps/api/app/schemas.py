@@ -35,6 +35,77 @@ class ProfileFieldRead(BaseModel):
     updated_at: datetime
 
 
+class ProfileBulkFieldWrite(ProfileFieldWrite):
+    field_key: str = Field(min_length=3, max_length=180)
+
+    @field_validator("field_key")
+    @classmethod
+    def valid_field_key(cls, value: str) -> str:
+        if not re.fullmatch(r"[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*", value):
+            raise ValueError("field_key must be a dotted canonical profile key")
+        return value
+
+
+class ProfileBulkWrite(BaseModel):
+    items: list[ProfileBulkFieldWrite] = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def unique_field_keys(self) -> "ProfileBulkWrite":
+        keys = [item.field_key for item in self.items]
+        if len(keys) != len(set(keys)):
+            raise ValueError("Each profile field may appear only once")
+        return self
+
+
+class ProfileWorkspaceFieldRead(BaseModel):
+    field_key: str
+    label: str
+    value: Any | None
+    status: ProfileStatus
+    source: str | None
+    last_verified_at: datetime | None
+    input_type: str
+    options: list[str]
+    important: bool
+    sensitive: bool
+    help_text: str
+
+
+class ProfileSectionRead(BaseModel):
+    key: str
+    title: str
+    fields: list[ProfileWorkspaceFieldRead]
+
+
+class ProfileReviewIssueRead(BaseModel):
+    code: str
+    severity: Literal["success", "info", "warning", "error"]
+    title: str
+    message: str
+    field_keys: list[str]
+    evidence_sources: list[str]
+    suggested_value: Any | None
+    requires_confirmation: bool
+
+
+class ProfileDocumentCheckRead(BaseModel):
+    document_id: str
+    document_type: str
+    status: Literal["readable", "locked", "no_text", "missing", "unsupported", "too_large", "unreadable"]
+    page_count: int | None
+
+
+class ProfileOverviewRead(BaseModel):
+    completeness_percent: float
+    important_fields_complete: int
+    important_fields_total: int
+    sections: list[ProfileSectionRead]
+    issues: list[ProfileReviewIssueRead]
+    document_checks: list[ProfileDocumentCheckRead]
+    external_address_verification: Literal["not_performed"]
+    generated_at: datetime
+
+
 class DocumentRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
