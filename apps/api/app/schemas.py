@@ -369,6 +369,7 @@ class ApplicationDetail(ApplicationSummary):
     eligibility_status: EligibilityStatus
     current_safety_assessment: SafetyAssessmentRead | None
     latest_inspection: "BrowserRunRead | None" = None
+    latest_fill: "DryRunFillRead | None" = None
     events: list[ApplicationEventRead]
     tasks: list[ManualTaskRead]
 
@@ -420,6 +421,37 @@ class BrowserRunRead(BaseModel):
     started_at: datetime
     finished_at: datetime | None
     fields: list[FormFieldPlanRead] = Field(default_factory=list)
+
+
+class FillFieldEvidenceRead(BaseModel):
+    id: str
+    ordinal: int
+    label: str
+    profile_field_key: str
+    profile_status: Literal["verified"]
+    source_reference: str
+    profile_updated_at: datetime
+    value_type: str
+    value_hash: str
+    result: Literal["filled"]
+    reason: str
+
+
+class DryRunFillRead(BaseModel):
+    id: str
+    application_id: str
+    browser_run_id: str
+    status: Literal["running", "completed", "blocked", "failed"]
+    execution_scope: Literal["offline_synthetic"]
+    source_page_hash: str
+    manifest_hash: str | None
+    field_count: int
+    filled_field_count: int
+    skipped_field_count: int
+    errors: list[dict[str, str]]
+    started_at: datetime
+    finished_at: datetime | None
+    fields: list[FillFieldEvidenceRead] = Field(default_factory=list)
 
 
 class DomainPolicyWrite(BaseModel):

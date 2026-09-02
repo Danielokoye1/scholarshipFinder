@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiUnavailable } from "@/components/api-unavailable";
+import { DryRunFillButton } from "@/components/dry-run-fill-button";
 import { InspectApplicationButton } from "@/components/inspect-application-button";
 import { PageHeading } from "@/components/page-heading";
 import { ReassessSafetyButton } from "@/components/reassess-safety-button";
@@ -29,16 +30,18 @@ export default async function ApplicationDetailPage({
   }
   const assessment = application.current_safety_assessment;
   const run = application.latest_inspection;
+  const fill = application.latest_fill;
   const canInspect = application.status === "ready_to_apply" && application.safety_status === "approved" && application.eligibility_status === "eligible";
+  const canFill = canInspect && run?.status === "completed" && run.detected_barriers.length === 0;
 
   return <div className="page detail-page">
     <PageHeading eyebrow="Application workflow" title={application.scholarship_name} description={`${application.provider ?? "Provider not recorded"} · version ${application.version}`} action={<ReassessSafetyButton applicationId={application.id} />} />
     <div className={`safety-banner ${application.safety_status}`}>
-      <div><span className="badge-label">Safety gate</span><strong>{label(application.safety_status)}</strong><p>{application.safety_status === "approved" ? "Destination checks passed. Phase 4 may inspect structure but cannot enter data." : "Browser inspection and personal data entry are locked."}</p></div>
+      <div><span className="badge-label">Safety gate</span><strong>{label(application.safety_status)}</strong><p>{application.safety_status === "approved" ? "Phase 5 may test verified mappings offline but cannot enter data on the destination." : "Browser inspection and personal data use are locked."}</p></div>
       <div><span className="badge-label">Assessment</span><p>{assessment?.application_domain ?? "No verified destination"}</p>{assessment?.reasons.length ? <ul>{assessment.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul> : null}</div>
     </div>
     <div className="application-stats"><div><span>State</span><strong>{label(application.status)}</strong></div><div><span>Eligibility</span><strong>{label(application.eligibility_status)}</strong></div><div><span>Priority</span><strong>{application.priority_score.toFixed(1)}</strong></div><div><span>Form readiness</span><strong>{run ? `${run.automatable_percent.toFixed(0)}%` : "Not inspected"}</strong></div></div>
-    {application.safety_status !== "approved" ? <div className="alert error"><strong>Do not enter personal information</strong><span>Review the exact destination independently, save a domain decision under <Link href="/system">System</Link>, then reassess here.</span></div> : <div className="alert info"><strong>Read-only inspection only</strong><span>The isolated browser blocks form submissions, uploads, non-read-only requests, cross-domain redirects, private networks, and WebSockets.</span></div>}
+    {application.safety_status !== "approved" ? <div className="alert error"><strong>Do not enter personal information</strong><span>Review the exact destination independently, save a domain decision under <Link href="/system">System</Link>, then reassess here.</span></div> : <div className="alert info"><strong>No live-site filling</strong><span>Inspection remains read-only. Fill tests run on a locally generated form with networking disabled, and live submission remains hard-locked.</span></div>}
 
     <section className="panel inspection-panel">
       <div className="panel-header"><div><h2>Application form plan</h2><p>Labels and provenance only—profile values are never included</p></div><InspectApplicationButton applicationId={application.id} enabled={canInspect} /></div>
@@ -49,6 +52,16 @@ export default async function ApplicationDetailPage({
         {run.fields.length ? <div className="table-scroll"><table><thead><tr><th>Form field</th><th>Required</th><th>Profile mapping</th><th>Disposition</th><th>Reason</th></tr></thead><tbody>{run.fields.map((field) => <tr key={field.id}><td><strong>{field.label}</strong><small>{field.tag_name} · {field.input_type}</small></td><td>{field.required ? "Yes" : "No"}</td><td>{field.profile_field_key ? <><span className="mono">{field.profile_field_key}</span><small>{(field.mapping_confidence * 100).toFixed(0)}% mapping · {field.profile_status ?? "unknown"}</small></> : "—"}</td><td><span className={`badge ${dispositionClass(field.disposition)}`}>{label(field.disposition)}</span></td><td className="field-reason">{field.reason}</td></tr>)}</tbody></table></div> : <div className="empty-state compact"><span>0</span><strong>No form fields recorded</strong><p>{run.status === "completed" ? "The page may not contain a standard application form." : "Review the inspection error and destination."}</p></div>}
         <div className="inspection-evidence"><span>Final destination</span><code>{run.final_url ?? run.start_url}</code><span>Page hash</span><code>{run.page_content_hash ?? "Unavailable"}</code></div>
       </> : <div className="empty-state"><span>⌕</span><strong>Form not inspected</strong><p>Once safety and eligibility are approved, run a fresh read-only inspection to identify required fields and manual checkpoints.</p></div>}
+    </section>
+
+    <section className="panel inspection-panel">
+      <div className="panel-header"><div><h2>Offline filling evidence</h2><p>Hashes and verified provenance only—answer values are not copied into this record</p></div><DryRunFillButton applicationId={application.id} enabled={canFill} /></div>
+      {fill ? <>
+        <div className="inspection-summary"><div><span>Run status</span><strong className={`status-text ${fill.status}`}>{label(fill.status)}</strong></div><div><span>Scope</span><strong>{label(fill.execution_scope)}</strong></div><div><span>Fields verified</span><strong>{fill.filled_field_count}</strong></div><div><span>Skipped</span><strong>{fill.skipped_field_count}</strong></div><div><span>Completed</span><strong>{new Date(fill.started_at).toLocaleString()}</strong></div></div>
+        {fill.errors.length ? <div className="alert error inspection-alert"><strong>Dry run stopped</strong><span>{fill.errors[0].message}</span></div> : null}
+        {fill.fields.length ? <div className="table-scroll"><table><thead><tr><th>Form field</th><th>Canonical source</th><th>Provenance</th><th>Result</th><th>Value evidence</th></tr></thead><tbody>{fill.fields.map((field) => <tr key={field.id}><td><strong>{field.label}</strong><small>Field {field.ordinal + 1}</small></td><td><span className="mono">{field.profile_field_key}</span><small>{field.profile_status}</small></td><td>{field.source_reference}<small>Profile checked {new Date(field.profile_updated_at).toLocaleString()}</small></td><td><span className="badge verified">{field.result}</span></td><td><span className="mono">sha256:{field.value_hash.slice(0, 12)}…</span><small>{field.value_type}; raw value not retained here</small></td></tr>)}</tbody></table></div> : null}
+        <div className="inspection-evidence"><span>Manifest hash</span><code>{fill.manifest_hash ?? "Unavailable"}</code><span>Source page hash</span><code>{fill.source_page_hash}</code></div>
+      </> : <div className="empty-state"><span>◇</span><strong>No offline fill evidence</strong><p>Switch System to Dry Run, enable Application preparation, and complete a barrier-free inspection first.</p></div>}
     </section>
 
     <div className="detail-grid"><section className="panel"><div className="panel-header"><div><h2>Action items</h2><p>Manual decisions associated with this workflow</p></div></div>{application.tasks.length ? <ul className="item-list">{application.tasks.map((task) => <li key={task.id}><div><span className={`badge ${task.status === "open" ? "warning" : "verified"}`}>{task.status}</span><strong>{task.title}</strong><p>{task.required_action}</p></div></li>)}</ul> : <div className="empty-state compact"><span>✓</span><strong>No tasks</strong></div>}</section>

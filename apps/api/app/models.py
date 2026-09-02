@@ -319,6 +319,49 @@ class FormFieldPlan(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
 
+class DryRunFill(Base):
+    __tablename__ = "dry_run_fills"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    application_id: Mapped[str] = mapped_column(ForeignKey("applications.id"), index=True)
+    browser_run_id: Mapped[str] = mapped_column(ForeignKey("browser_runs.id"), index=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    execution_scope: Mapped[str] = mapped_column(String(40), default="offline_synthetic")
+    source_page_hash: Mapped[str] = mapped_column(String(64))
+    manifest_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    field_count: Mapped[int] = mapped_column(Integer, default=0)
+    filled_field_count: Mapped[int] = mapped_column(Integer, default=0)
+    skipped_field_count: Mapped[int] = mapped_column(Integer, default=0)
+    errors_json: Mapped[Any] = mapped_column(JSON, default=list)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
+class FillFieldEvidence(Base):
+    __tablename__ = "fill_field_evidence"
+    __table_args__ = (
+        UniqueConstraint("fill_run_id", "field_plan_id", name="uq_fill_evidence_run_field"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    fill_run_id: Mapped[str] = mapped_column(ForeignKey("dry_run_fills.id"), index=True)
+    application_id: Mapped[str] = mapped_column(ForeignKey("applications.id"), index=True)
+    field_plan_id: Mapped[str] = mapped_column(ForeignKey("form_field_plans.id"), index=True)
+    profile_field_id: Mapped[int] = mapped_column(ForeignKey("profile_fields.id"))
+    ordinal: Mapped[int] = mapped_column(Integer)
+    label: Mapped[str] = mapped_column(String(500))
+    profile_field_key: Mapped[str] = mapped_column(String(180))
+    profile_status: Mapped[str] = mapped_column(String(32))
+    source_reference: Mapped[str] = mapped_column(String(500))
+    profile_updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    value_type: Mapped[str] = mapped_column(String(40))
+    value_hash: Mapped[str] = mapped_column(String(64))
+    result: Mapped[str] = mapped_column(String(32))
+    reason: Mapped[str] = mapped_column(String(1000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+
 class PrioritySettings(Base):
     __tablename__ = "priority_settings"
 

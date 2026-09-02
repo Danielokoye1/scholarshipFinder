@@ -178,6 +178,7 @@ export type ApplicationDetail = ApplicationSummary & {
   eligibility_status: ScholarshipSummary["eligibility_status"];
   current_safety_assessment: SafetyAssessment | null;
   latest_inspection: BrowserRun | null;
+  latest_fill: DryRunFill | null;
   events: Array<{
     id: string;
     from_status: string | null;
@@ -231,6 +232,37 @@ export type BrowserRun = {
   started_at: string;
   finished_at: string | null;
   fields: FormFieldPlan[];
+};
+
+export type FillFieldEvidence = {
+  id: string;
+  ordinal: number;
+  label: string;
+  profile_field_key: string;
+  profile_status: "verified";
+  source_reference: string;
+  profile_updated_at: string;
+  value_type: string;
+  value_hash: string;
+  result: "filled";
+  reason: string;
+};
+
+export type DryRunFill = {
+  id: string;
+  application_id: string;
+  browser_run_id: string;
+  status: "running" | "completed" | "blocked" | "failed";
+  execution_scope: "offline_synthetic";
+  source_page_hash: string;
+  manifest_hash: string | null;
+  field_count: number;
+  filled_field_count: number;
+  skipped_field_count: number;
+  errors: Array<{ category: string; message: string }>;
+  started_at: string;
+  finished_at: string | null;
+  fields: FillFieldEvidence[];
 };
 
 export type ApplicationList = {

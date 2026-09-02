@@ -2,6 +2,7 @@ import type {
   ApplicationDetail,
   ApplicationList,
   BrowserRun,
+  DryRunFill,
   DashboardData,
   DocumentRecord,
   DomainPolicy,
@@ -44,6 +45,8 @@ export const api = {
     readJson<ApplicationDetail>(`/api/applications/${id}/reassess-safety`, { method: "POST" }),
   inspectApplication: (id: string) =>
     readJson<BrowserRun>(`/api/applications/${id}/inspect`, { method: "POST" }),
+  dryRunFill: (id: string) =>
+    readJson<DryRunFill>(`/api/applications/${id}/dry-run-fill`, { method: "POST" }),
   tasks: () => readJson<ManualTask[]>("/api/tasks"),
   updateTask: (id: string, status: "resolved" | "dismissed") =>
     readJson<ManualTask>(`/api/tasks/${id}`, {

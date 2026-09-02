@@ -74,6 +74,14 @@ Fresh safety assessment
 
 The `application_started`, `filling`, `ready_to_submit`, `submitting`, and `submitted` states remain locked in Phase 4. This is an API constraint, not merely a disabled UI control.
 
+## Phase 5 offline fill boundary
+
+`POST /api/applications/{id}/dry-run-fill` resolves only high-confidence field mappings to currently verified profile records. It generates a script-free form locally, blocks every browser network request, fills that synthetic page, checks that each control retained the intended value, and destroys the context.
+
+The durable evidence contains the canonical profile key, profile record identifier, verification status, source reference, freshness timestamp, value type, and SHA-256 value hash. The fill record does not contain the answer itself and cannot send it to an application website. Repeating a successful fill for the same inspection returns the existing evidence.
+
+The live application states remain locked in Phase 5.
+
 See `SAFETY_MODEL.md` for the threat model and `ISOLATION.md` for project boundaries.
 
 All dashboard values originate from database queries. Empty tables produce zero counts and empty lists—not fixtures.

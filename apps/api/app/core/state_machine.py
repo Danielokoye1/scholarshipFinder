@@ -107,7 +107,7 @@ def transition_application(
     if to_status in DATA_ENTRY_STATES and application.scholarship_id is None:
         raise InvalidTransition("The application has no scholarship record")
     if enforce_phase_gate and to_status in LOCKED_BROWSER_ACTION_STATES:
-        raise InvalidTransition("Form filling and submission remain disabled in Phase 4")
+        raise InvalidTransition("Live form filling and submission remain disabled in Phase 5")
 
     previous = application.status
     application.status = to_status

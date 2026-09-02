@@ -23,9 +23,16 @@
 - Redacted field plans with deterministic profile-key mappings and manual barrier detection
 - Fake local application fixture proving that hidden values and blocked requests are not used
 
-## Phase 5–6 — guarded browser preparation
+## Phase 5 — offline deterministic filling (implemented)
 
-- Verified-field dry-run filling and pre-submission validation
+- Dry Run mode and preparation permission are explicit prerequisites
+- Verified scalar profile values are exercised only in a synthetic, script-free page
+- All network requests are blocked and no external site receives profile data
+- Evidence stores provenance and hashes rather than copied answer values
+
+## Phase 6 — pre-submission validation
+
+- Immutable intended-submission snapshots and complete safety regression gates
 
 ## Phase 7+ — controlled operation
 

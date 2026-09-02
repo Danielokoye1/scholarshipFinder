@@ -139,7 +139,7 @@ def test_sensitive_requirements_override_domain_approval(client):
     assert any("application_fee" in reason for reason in blocked_assessment["reasons"])
 
 
-def test_approved_domain_enables_workflow_but_phase_four_blocks_data_entry(client):
+def test_approved_domain_enables_workflow_but_phase_five_blocks_live_data_entry(client):
     assert set_gpa(client).status_code == 200
     assert approve_domain(client).status_code == 200
     scholarship = ingest(client).json()
@@ -163,7 +163,7 @@ def test_approved_domain_enables_workflow_but_phase_four_blocks_data_entry(clien
         },
     )
     assert transition.status_code == 409
-    assert "disabled in Phase 4" in transition.json()["detail"]
+    assert "disabled in Phase 5" in transition.json()["detail"]
 
 
 def test_unapproved_domain_creates_a_safety_task_then_explicit_reassessment_clears_it(client):

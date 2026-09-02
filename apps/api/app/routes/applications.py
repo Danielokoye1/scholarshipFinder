@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.priority import refresh_priority
 from app.browser.serialization import browser_run_read
+from app.browser.fill_serialization import dry_run_fill_read
 from app.core.safety import persist_safety_assessment
 from app.core.state_machine import (
     InvalidTransition,
@@ -15,6 +16,7 @@ from app.models import (
     Application,
     ApplicationEvent,
     BrowserRun,
+    DryRunFill,
     ManualTask,
     SafetyAssessment,
     Scholarship,
@@ -164,12 +166,18 @@ def detail(db: Session, application: Application, scholarship: Scholarship) -> A
         .where(BrowserRun.application_id == application.id)
         .order_by(BrowserRun.started_at.desc(), BrowserRun.id.desc())
     )
+    latest_fill = db.scalar(
+        select(DryRunFill)
+        .where(DryRunFill.application_id == application.id)
+        .order_by(DryRunFill.started_at.desc(), DryRunFill.id.desc())
+    )
     base = application_summary(application, scholarship).model_dump()
     return ApplicationDetail(
         **base,
         eligibility_status=scholarship.eligibility_status,
         current_safety_assessment=safety_read(current_safety),
         latest_inspection=browser_run_read(db, latest_inspection) if latest_inspection else None,
+        latest_fill=dry_run_fill_read(db, latest_fill) if latest_fill else None,
         events=[
             ApplicationEventRead(
                 id=event.id,
