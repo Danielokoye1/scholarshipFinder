@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     api_port: int = 8000
     web_origin: str = "http://127.0.0.1:3000"
     max_document_bytes: int = 25 * 1024 * 1024
+    eligibility_rule_confidence_threshold: float = 0.85
+    duplicate_title_similarity_threshold: float = 0.86
+    trusted_source_domains: str = ""
 
     model_config = SettingsConfigDict(
         env_file=("../../.env", ".env"), env_file_encoding="utf-8", extra="ignore"

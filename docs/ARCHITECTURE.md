@@ -26,5 +26,21 @@ The API currently enables credentials for the configured local web origin only. 
 - `apps/web`: operational interface
 - `storage`: ignored local database, documents, and screenshots
 
-All dashboard values originate from database queries. Empty tables produce zero counts and empty lists—not fixtures.
+## Phase 2 intelligence flow
 
+```text
+Structured source record
+  -> canonical text and URLs
+  -> exact/fingerprint/provider-title deduplication
+  -> immutable source evidence
+  -> deterministic legitimacy signals
+  -> typed eligibility rules
+  -> canonical profile comparison
+  -> persisted eligibility checks and overall status
+```
+
+The ingestion boundary requires each rule to carry a quote that actually occurs in the captured source text. Low-confidence rules, unmapped fields, unsupported values, and missing profile information stop at `needs_verification` or `unknown`. They cannot become eligibility passes.
+
+Trusted domains are deny-by-default. An exact domain or its subdomains may be added to `TRUSTED_SOURCE_DOMAINS` after review; detecting no scam phrases by itself produces only `likely_legitimate`, never `verified`.
+
+All dashboard values originate from database queries. Empty tables produce zero counts and empty lists—not fixtures.

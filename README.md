@@ -1,6 +1,6 @@
 # scholarshipFinder
 
-A private, local-first scholarship workflow system. The project is intentionally being built in guarded vertical phases; the current implementation is **Phase 1**.
+A private, local-first scholarship workflow system. The project is intentionally being built in guarded vertical phases; the current implementation includes **Phases 1 and 2**.
 
 ## What works now
 
@@ -11,6 +11,10 @@ A private, local-first scholarship workflow system. The project is intentionally
 - A durable activity log
 - SQLite migrations and API regression tests
 - Localhost-only API defaults
+- Structured scholarship ingestion with source evidence
+- Deterministic URL normalization and duplicate detection
+- Rule-based eligibility evaluation with profile-value snapshots
+- Conservative scholarship legitimacy screening
 
 No real scholarship application can be submitted by this version. The operating mode defaults to `DISCOVERY_ONLY` and automatic submission is disabled.
 
@@ -47,5 +51,4 @@ npm run migrate
 - The API binds to loopback by default.
 - Browser automation and live submission are deliberately absent until later safety phases.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/ROADMAP.md](docs/ROADMAP.md).
-
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), and [docs/ROADMAP.md](docs/ROADMAP.md).

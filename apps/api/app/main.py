@@ -2,12 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routes import dashboard, documents, profile, system
+from app.routes import dashboard, documents, profile, scholarships, system
 
 
 app = FastAPI(
     title="scholarshipFinder API",
-    version="0.1.0",
+    version="0.2.0",
     description="Local-only API. This phase cannot submit scholarship applications.",
 )
 app.add_middleware(
@@ -27,4 +27,5 @@ def health() -> dict[str, str]:
 app.include_router(dashboard.router)
 app.include_router(profile.router)
 app.include_router(documents.router)
+app.include_router(scholarships.router)
 app.include_router(system.router)

@@ -4,9 +4,10 @@
 
 - Local profile, document metadata/vault, dashboard shell, persistent safety controls
 
-## Phase 2 — opportunity intelligence
+## Phase 2 — opportunity intelligence (implemented)
 
 - Scholarship ingestion, normalized sources, deterministic deduplication, eligibility rules and evidence
+- Canonical URL cleanup, source hashes, legitimacy screening, and repeatable reevaluation
 
 ## Phase 3 — workflow
 
@@ -21,4 +22,3 @@
 - Explicitly enabled submission, durable workers, response tracking, additional source adapters
 
 Live submission must remain unavailable until the safety regression suite, dry runs, recovery behavior, audit evidence, and emergency stop have all been validated.
-
