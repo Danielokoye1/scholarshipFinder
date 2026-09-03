@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
+from app.core.application_workflow import create_application_task as create_task
+from app.core.application_workflow import reconcile_application
 from app.core.priority import refresh_priority
 from app.browser.serialization import browser_run_read
 from app.browser.fill_serialization import dry_run_fill_read
@@ -18,8 +20,6 @@ from app.models import (
     ApplicationEvent,
     BrowserRun,
     DryRunFill,
-    EligibilityCheck,
-    EligibilityRule,
     ManualTask,
     SafetyAssessment,
     Scholarship,
@@ -39,25 +39,6 @@ from app.schemas import (
 from app.services import record_event
 
 router = APIRouter(prefix="/api/applications", tags=["applications"])
-
-
-def unresolved_eligibility_action(db: Session, scholarship: Scholarship) -> str:
-    requirements = list(
-        db.scalars(
-            select(EligibilityRule.requirement_text)
-            .join(EligibilityCheck, EligibilityCheck.rule_id == EligibilityRule.id)
-            .where(
-                EligibilityRule.scholarship_id == scholarship.id,
-                EligibilityCheck.is_current.is_(True),
-                EligibilityCheck.result.in_({"unknown", "needs_verification"}),
-            )
-            .order_by(EligibilityRule.created_at, EligibilityRule.id)
-            .limit(5)
-        )
-    )
-    if not requirements:
-        return "Review the unknown eligibility checks and add only verified profile information."
-    return "Confirm these unresolved requirements: " + "; ".join(requirements)
 
 
 def task_read(task: ManualTask) -> ManualTaskRead:
@@ -112,41 +93,6 @@ def application_summary(application: Application, scholarship: Scholarship) -> A
         version=application.version,
         updated_at=application.updated_at,
     )
-
-
-def create_task(
-    db: Session,
-    application: Application,
-    scholarship: Scholarship,
-    *,
-    category: str,
-    title: str,
-    required_action: str,
-) -> ManualTask:
-    existing = db.scalar(
-        select(ManualTask).where(
-            ManualTask.application_id == application.id,
-            ManualTask.category == category,
-            ManualTask.status == "open",
-        )
-    )
-    if existing:
-        existing.required_action = required_action
-        existing.priority_score = application.priority_score
-        return existing
-    task = ManualTask(
-        application_id=application.id,
-        scholarship_id=scholarship.id,
-        category=category,
-        title=title,
-        required_action=required_action,
-        status="open",
-        direct_url=scholarship.application_url or scholarship.source_url,
-        priority_score=application.priority_score,
-        deadline=scholarship.deadline,
-    )
-    db.add(task)
-    return task
 
 
 def get_application_and_scholarship(
@@ -258,60 +204,7 @@ def create_application(
         enforce_phase_gate=False,
     )
     safety = persist_safety_assessment(db, scholarship, application.id)
-    application.safety_status = safety.status
-    refresh_priority(db, scholarship, application)
-
-    if scholarship.eligibility_status == "ineligible":
-        transition_application(
-            db,
-            application,
-            "ineligible",
-            "At least one deterministic eligibility requirement failed",
-            enforce_phase_gate=False,
-        )
-    elif scholarship.eligibility_status != "eligible":
-        transition_application(
-            db,
-            application,
-            "needs_user_input",
-            "Eligibility contains unknown or unverified requirements",
-            enforce_phase_gate=False,
-        )
-        create_task(
-            db,
-            application,
-            scholarship,
-            category="verify_information",
-            title=f"Verify eligibility for {scholarship.canonical_name}",
-            required_action=unresolved_eligibility_action(db, scholarship),
-        )
-    elif safety.status != "approved":
-        transition_application(
-            db,
-            application,
-            "needs_review",
-            "Application safety must be approved before any personal data is entered",
-            enforce_phase_gate=False,
-        )
-        create_task(
-            db,
-            application,
-            scholarship,
-            category="safety_review",
-            title=f"Review {safety.application_domain or 'application destination'}",
-            required_action="Review the provider and application domain, then explicitly approve or block the domain.",
-        )
-    else:
-        transition_application(
-            db,
-            application,
-            "ready_to_apply",
-            "Eligibility and application safety checks passed",
-            enforce_phase_gate=False,
-        )
-    refresh_priority(db, scholarship, application)
-    for task in db.scalars(select(ManualTask).where(ManualTask.application_id == application.id)):
-        task.priority_score = application.priority_score
+    reconcile_application(db, application, scholarship, safety)
     record_event(db, "application.created", f"Created workflow for {scholarship.canonical_name}")
     db.commit()
     return detail(db, application, scholarship)

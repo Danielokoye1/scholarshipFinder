@@ -139,6 +139,12 @@ def test_profile_supports_scholarship_affiliation_context(client):
                     "status": "user_entered",
                     "source": "User",
                 },
+                {
+                    "field_key": "affiliations.nsbe_gpa_verification",
+                    "value": "not yet verified",
+                    "status": "user_entered",
+                    "source": "User",
+                },
             ]
         },
     )
@@ -147,6 +153,10 @@ def test_profile_supports_scholarship_affiliation_context(client):
     body = response.json()
     assert field_from_overview(body, "affiliations.nsbe_membership")["value"] == "Unsure"
     assert field_from_overview(body, "affiliations.nsbe_region")["value"] == "Region 4"
+    assert (
+        field_from_overview(body, "affiliations.nsbe_gpa_verification")["value"]
+        == "Not yet verified"
+    )
 
 
 def test_profile_persists_high_volume_strategy_without_authorizing_submission(client):

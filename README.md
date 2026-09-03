@@ -31,6 +31,8 @@ A private, local-first scholarship workflow system. The project is intentionally
 - A priority-ranked action queue and transparent ranking weights
 - Hard-zero priority for deterministically ineligible or expired opportunities so they cannot consume campaign capacity
 - Requirement-specific action items that identify exactly which eligibility facts remain unresolved
+- A curated official NSBE Fall 2026 catalog with Region 4, major, class-year, GPA, citizenship, membership, and current-term GPA-verification checks
+- Workflow reconciliation that updates existing application states and tasks when verified profile facts change
 - Opportunities, applications, safety review, and action queue interfaces
 - Playwright inspection through a fresh, non-persistent Chrome context
 - SSRF, same-origin, HTTPS, request-method, WebSocket, download, timeout, and size guards
@@ -72,7 +74,10 @@ npm run migrate
 npm run gmail:connect
 npm run gmail:sync
 npm run gmail:status
+npm run discover:nsbe
 ```
+
+`npm run discover:nsbe` idempotently imports the currently curated awards from the official NSBE scholarship catalog. NSBE opportunities remain locally queued until the published cycle opens and the current MyNSBE GPA-verification requirement is confirmed.
 
 ## Safety boundaries
 

@@ -6,6 +6,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.deduplication import find_duplicate
+from app.core.application_workflow import reconcile_application
 from app.core.eligibility import evaluate_scholarship
 from app.core.legitimacy import assess_legitimacy
 from app.core.normalization import (
@@ -20,6 +21,7 @@ from app.core.safety import persist_safety_assessment
 from app.db import get_db
 from app.config import settings
 from app.models import (
+    Application,
     EligibilityCheck,
     EligibilityRule,
     ManualTask,
@@ -389,8 +391,15 @@ def reevaluate_all(
     counts = {"eligible": 0, "ineligible": 0, "needs_information": 0}
     for scholarship in scholarships:
         evaluate_scholarship(db, scholarship)
-        persist_safety_assessment(db, scholarship)
+        application = db.scalar(
+            select(Application).where(Application.scholarship_id == scholarship.id)
+        )
+        safety = persist_safety_assessment(
+            db, scholarship, application.id if application is not None else None
+        )
         refresh_priority(db, scholarship)
+        if application is not None:
+            reconcile_application(db, application, scholarship, safety)
         counts[scholarship.eligibility_status] += 1
     record_event(db, "eligibility.batch_evaluated", f"Evaluated {len(scholarships)} scholarships")
     db.commit()
@@ -483,8 +492,15 @@ def reevaluate_scholarship(
     if scholarship is None:
         raise HTTPException(status_code=404, detail="Scholarship not found")
     evaluate_scholarship(db, scholarship)
-    persist_safety_assessment(db, scholarship)
+    application = db.scalar(
+        select(Application).where(Application.scholarship_id == scholarship.id)
+    )
+    safety = persist_safety_assessment(
+        db, scholarship, application.id if application is not None else None
+    )
     refresh_priority(db, scholarship)
+    if application is not None:
+        reconcile_application(db, application, scholarship, safety)
     record_event(db, "eligibility.evaluated", f"Evaluated {scholarship.canonical_name}")
     db.commit()
     return scholarship_detail(scholarship_id, db)

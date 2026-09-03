@@ -26,14 +26,15 @@ def find_duplicate(
     deadline,
     award_max_cents: int | None,
 ) -> DuplicateMatch | None:
+    # A single provider portal can host many distinct awards. Treating its shared
+    # start URL as a globally unique scholarship identifier collapses an entire
+    # catalog into one record. Exact source identity and the scholarship
+    # fingerprint remain safe deterministic duplicate keys; provider/title
+    # similarity below handles routed application links conservatively.
     exact_conditions = [Scholarship.source_url == source_url, Scholarship.fingerprint == fingerprint]
-    if application_url:
-        exact_conditions.append(Scholarship.application_url == application_url)
     exact = db.scalar(select(Scholarship).where(or_(*exact_conditions)).limit(1))
     if exact:
         reason = "canonical_url" if exact.source_url == source_url else "identity_fingerprint"
-        if application_url and exact.application_url == application_url:
-            reason = "application_url"
         return DuplicateMatch(exact, reason, 1.0)
 
     normalized_provider = normalized_label(provider)

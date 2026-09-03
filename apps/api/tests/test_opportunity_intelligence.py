@@ -170,6 +170,24 @@ def test_same_provider_and_equivalent_title_are_detected_across_directories(clie
     assert result["duplicate_reason"] == "provider_and_title_similarity"
 
 
+def test_distinct_awards_can_share_a_provider_application_portal(client):
+    first = client.post("/api/scholarships/ingest", json=scholarship_payload()).json()
+    second_payload = scholarship_payload(
+        name="Community Leadership Scholarship",
+        source_url="https://www.example.org/scholarships/community-leadership",
+        award_min_cents=250000,
+        award_max_cents=250000,
+        award_description="$2,500",
+    )
+
+    response = client.post("/api/scholarships/ingest", json=second_payload)
+
+    assert response.status_code == 201
+    assert response.json()["created"] is True
+    assert response.json()["scholarship_id"] != first["scholarship_id"]
+    assert client.get("/api/scholarships").json()["total"] == 2
+
+
 def test_equivalent_deadline_offsets_share_an_identity_fingerprint(client):
     first = client.post("/api/scholarships/ingest", json=scholarship_payload()).json()
     payload = scholarship_payload(

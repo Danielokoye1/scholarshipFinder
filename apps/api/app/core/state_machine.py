@@ -37,6 +37,7 @@ ALLOWED_TRANSITIONS = {
     "eligibility_check": {"ineligible", "ready_to_apply", "needs_user_input", "needs_review", "expired"},
     "ineligible": {"eligibility_check", "cancelled"},
     "ready_to_apply": {
+        "eligibility_check",
         "application_started",
         "needs_user_input",
         "needs_essay",

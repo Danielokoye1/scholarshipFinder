@@ -108,6 +108,16 @@ FIELD_DEFINITIONS = (
         help_text="Use the region shown in your NSBE account or chapter listing.",
     ),
     FieldDefinition(
+        "affiliations.nsbe_gpa_verification",
+        "NSBE GPA verification",
+        "affiliations",
+        options=("Verified for current window", "Not yet verified", "Unsure"),
+        help_text=(
+            "NSBE requires collegiate GPAs to be approved by a registered advisor or "
+            "university official during each verification window."
+        ),
+    ),
+    FieldDefinition(
         "preferences.discovery_scope",
         "Discovery scope",
         "strategy",

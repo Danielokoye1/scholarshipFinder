@@ -231,6 +231,30 @@ def test_unknown_and_failed_eligibility_have_distinct_terminal_workflow_states(c
     assert failed_detail["priority_score"] == 0
 
 
+def test_reevaluation_reconciles_a_stale_application_and_resolves_eligibility_task(client):
+    assert approve_domain(client).status_code == 200
+    scholarship = ingest(client).json()
+    application = client.post(
+        "/api/applications", json={"scholarship_id": scholarship["scholarship_id"]}
+    ).json()
+    assert application["status"] == "needs_user_input"
+    assert application["tasks"][0]["status"] == "open"
+    assert application["tasks"][0]["priority_score"] == application["priority_score"]
+
+    assert set_gpa(client).status_code == 200
+    response = client.post(f"/api/scholarships/{scholarship['scholarship_id']}/evaluate")
+    assert response.status_code == 200
+
+    reconciled = client.get(f"/api/applications/{application['id']}").json()
+    assert reconciled["status"] == "ready_to_apply"
+    assert reconciled["safety_status"] == "approved"
+    assert reconciled["tasks"][0]["status"] == "resolved"
+    assert [event["to_status"] for event in reconciled["events"]][-2:] == [
+        "eligibility_check",
+        "ready_to_apply",
+    ]
+
+
 def test_transition_uses_optimistic_version_guard(client):
     assert set_gpa(client).status_code == 200
     scholarship = ingest(client).json()
