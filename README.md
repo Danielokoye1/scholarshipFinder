@@ -89,5 +89,6 @@ npm run migrate
 - Security-clearance, background-check, employment, and service commitments always remain explicit review gates.
 - Supabase and other cloud services are intentionally not connected. Data remains in this repository's ignored `storage/` tree.
 - Recording Gmail as the mailbox provider does not grant inbox access; future monitoring must use a separate read-only OAuth connection and locally protected tokens.
+- Gmail OAuth client and token files belong only in the Git-ignored, owner-only `storage/secrets/` directory.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SAFETY_MODEL.md](docs/SAFETY_MODEL.md), [docs/PROFILE_INTELLIGENCE.md](docs/PROFILE_INTELLIGENCE.md), [docs/ISOLATION.md](docs/ISOLATION.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), [docs/PHASE_3_API.md](docs/PHASE_3_API.md), [docs/PHASE_4_API.md](docs/PHASE_4_API.md), [docs/PHASE_5_API.md](docs/PHASE_5_API.md), [docs/PHASE_6_API.md](docs/PHASE_6_API.md), [docs/SECURITY_AUDIT_PHASE_6.md](docs/SECURITY_AUDIT_PHASE_6.md), and [docs/ROADMAP.md](docs/ROADMAP.md).

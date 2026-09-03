@@ -15,3 +15,4 @@ storage/documents/*
 !storage/documents/.gitkeep
 storage/screenshots/*
 !storage/screenshots/.gitkeep
+storage/secrets/*
