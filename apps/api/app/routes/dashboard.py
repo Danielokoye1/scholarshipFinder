@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import ManualTask, Scholarship, SystemEvent
+from app.models import EmailMessage, ManualTask, Scholarship, SystemEvent
 from app.schemas import DashboardResponse
 from app.services import dashboard_metrics, get_or_create_settings
 
@@ -37,6 +37,9 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardResponse:
             .limit(6)
         )
     )
+    email_updates = list(
+        db.scalars(select(EmailMessage).order_by(EmailMessage.received_at.desc()).limit(6))
+    )
     return DashboardResponse(
         metrics=dashboard_metrics(db),
         settings=settings,
@@ -60,5 +63,17 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardResponse:
                 "award_max_cents": scholarship.award_max_cents,
             }
             for scholarship in deadlines
+        ],
+        email_updates=[
+            {
+                "provider_message_id": message.provider_message_id,
+                "sender": message.sender,
+                "subject": message.subject,
+                "received_at": message.received_at,
+                "category": message.category,
+                "is_unread": message.is_unread,
+                "is_actionable": message.is_actionable,
+            }
+            for message in email_updates
         ],
     )

@@ -9,6 +9,7 @@ from app.routes import (
     applications,
     dashboard,
     documents,
+    email,
     filling,
     inspections,
     priority,
@@ -23,7 +24,7 @@ from app.routes import (
 
 app = FastAPI(
     title="scholarshipFinder API",
-    version="0.6.7",
+    version="0.7.0",
     description="Private local workflow API with profile intelligence and immutable dry-run validation.",
 )
 allowed_origins = {settings.web_origin, "http://localhost:3217"}
@@ -60,6 +61,7 @@ def health() -> dict[str, str]:
 app.include_router(dashboard.router)
 app.include_router(profile.router)
 app.include_router(documents.router)
+app.include_router(email.router)
 app.include_router(scholarships.router)
 app.include_router(applications.router)
 app.include_router(inspections.router)

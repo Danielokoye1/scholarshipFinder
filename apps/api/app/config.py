@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///../../storage/database/scholarship_finder.db"
     document_storage_path: Path = Path("../../storage/documents")
     screenshot_storage_path: Path = Path("../../storage/screenshots")
+    gmail_client_secret_path: Path = Path("../../storage/secrets/gmail-oauth-client.json")
+    gmail_token_path: Path = Path("../../storage/secrets/gmail-token.json")
     api_host: str = "127.0.0.1"
     api_port: int = 8217
     web_origin: str = "http://127.0.0.1:3217"

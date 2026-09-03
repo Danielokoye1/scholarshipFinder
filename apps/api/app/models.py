@@ -114,6 +114,21 @@ class SystemEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, index=True)
 
 
+class EmailMessage(Base):
+    __tablename__ = "email_messages"
+
+    provider_message_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    thread_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    sender: Mapped[str] = mapped_column(String(500))
+    subject: Mapped[str] = mapped_column(String(1000))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    category: Mapped[str] = mapped_column(String(40), default="update", index=True)
+    is_unread: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    is_actionable: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, index=True)
+
+
 class Scholarship(Base):
     __tablename__ = "scholarships"
 

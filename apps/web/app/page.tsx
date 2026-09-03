@@ -18,6 +18,8 @@ export default async function DashboardPage() {
     ["Ready for preparation", data.metrics.ready_for_preparation.toLocaleString()],
     ["Dry runs completed", data.metrics.dry_runs_completed.toLocaleString()],
     ["Validation passes", data.metrics.validation_passes.toLocaleString()],
+    ["Email updates tracked", data.metrics.email_messages_tracked.toLocaleString()],
+    ["Actionable emails", data.metrics.email_actionable.toLocaleString()],
     ["Applications submitted", data.metrics.applications_submitted.toLocaleString()],
     ["Potential awards", currency.format(data.metrics.potential_awards_cents / 100)],
     ["Applications this week", data.metrics.applications_this_week.toLocaleString()],
@@ -35,6 +37,7 @@ export default async function DashboardPage() {
       <div className="dashboard-grid">
         <section className="panel attention-panel"><div className="panel-header"><div><h2>Needs your attention</h2><p>Blocking actions ordered by urgency</p></div><span className="count">{data.attention.length}</span></div>{data.attention.length ? <ul className="item-list">{data.attention.map((task) => <li key={task.id}><div><span className="badge warning">{task.category}</span><strong>{task.title}</strong><p>{task.required_action}</p></div>{task.deadline ? <time>{new Date(task.deadline).toLocaleDateString()}</time> : null}</li>)}</ul> : <EmptyState title="You’re all caught up" detail="No tasks currently need your input." />}</section>
         <section className="panel"><div className="panel-header"><div><h2>Upcoming deadlines</h2><p>Next 30 days</p></div></div>{data.upcoming_deadlines.length ? <ul className="item-list">{data.upcoming_deadlines.map((item) => <li key={item.id}><div><strong>{item.name}</strong><p>{item.provider ?? "Provider not recorded"}</p></div><time>{new Date(item.deadline).toLocaleDateString()}</time></li>)}</ul> : <EmptyState title="No upcoming deadlines" detail="Deadlines appear here after opportunities are added." />}</section>
+        <section className="panel"><div className="panel-header"><div><h2>Scholarship email</h2><p>Metadata only · no message bodies</p></div><span className="count">{data.email_updates.filter((item) => item.is_actionable).length}</span></div>{data.email_updates.length ? <ul className="item-list">{data.email_updates.map((item) => <li key={item.provider_message_id}><div><span className={`badge ${item.is_actionable ? "warning" : ""}`}>{item.category.replaceAll("_", " ")}</span><strong>{item.subject}</strong><p>{item.sender}</p></div><time>{new Date(item.received_at).toLocaleDateString()}</time></li>)}</ul> : <EmptyState title="No Gmail metadata yet" detail="Authorize Gmail once, then run a metadata sync." />}</section>
         <section className="panel activity-panel"><div className="panel-header"><div><h2>System activity</h2><p>Persistent local audit events</p></div></div>{data.activity.length ? <ul className="activity-list">{data.activity.map((event) => <li key={event.id}><time>{new Date(event.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time><span className={`activity-marker ${event.severity}`} /><p>{event.message}</p></li>)}</ul> : <EmptyState title="No activity yet" detail="System events will be recorded here as they happen." />}</section>
       </div>
     </div>

@@ -11,6 +11,7 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Sensitive self-identification fields kept distinct from citizenship and used only for local matching
 - A persisted application strategy for nationwide, high-volume discovery with manual essay and financial review
 - Bounded daily discovery and weekly preparation targets that measure campaign throughput
+- Metadata-only Gmail monitoring with local OAuth tokens, account-match verification, and no send/modify capability
 - Derived full-name and graduation-year facts only when their source fields are verified
 - A local document vault with checksums and explicit auto-upload approval
 - Safe document versioning that uses the newest profile source and revokes stale upload approvals
@@ -68,6 +69,9 @@ npm test
 npm run lint
 npm run build
 npm run migrate
+npm run gmail:connect
+npm run gmail:sync
+npm run gmail:status
 ```
 
 ## Safety boundaries
@@ -88,7 +92,7 @@ npm run migrate
 - HTTPS, direct-IP, unusual-port, payment, banking, identity, and signature rules are checked before a workflow can become ready.
 - Security-clearance, background-check, employment, and service commitments always remain explicit review gates.
 - Supabase and other cloud services are intentionally not connected. Data remains in this repository's ignored `storage/` tree.
-- Recording Gmail as the mailbox provider does not grant inbox access; future monitoring must use a separate read-only OAuth connection and locally protected tokens.
+- Gmail monitoring requests only `gmail.metadata`; message bodies and attachments are never requested or stored.
 - Gmail OAuth client and token files belong only in the Git-ignored, owner-only `storage/secrets/` directory.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SAFETY_MODEL.md](docs/SAFETY_MODEL.md), [docs/PROFILE_INTELLIGENCE.md](docs/PROFILE_INTELLIGENCE.md), [docs/ISOLATION.md](docs/ISOLATION.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), [docs/PHASE_3_API.md](docs/PHASE_3_API.md), [docs/PHASE_4_API.md](docs/PHASE_4_API.md), [docs/PHASE_5_API.md](docs/PHASE_5_API.md), [docs/PHASE_6_API.md](docs/PHASE_6_API.md), [docs/SECURITY_AUDIT_PHASE_6.md](docs/SECURITY_AUDIT_PHASE_6.md), and [docs/ROADMAP.md](docs/ROADMAP.md).

@@ -11,6 +11,8 @@ def test_dashboard_starts_with_real_empty_metrics(client):
         "ready_for_preparation": 0,
         "dry_runs_completed": 0,
         "validation_passes": 0,
+        "email_messages_tracked": 0,
+        "email_actionable": 0,
         "applications_submitted": 0,
         "potential_awards_cents": 0,
         "applications_this_week": 0,
@@ -21,6 +23,7 @@ def test_dashboard_starts_with_real_empty_metrics(client):
     }
     assert data["settings"]["operating_mode"] == "discovery_only"
     assert data["settings"]["automatic_submission_enabled"] is False
+    assert data["email_updates"] == []
 
 
 def test_unknown_profile_value_is_rejected(client):

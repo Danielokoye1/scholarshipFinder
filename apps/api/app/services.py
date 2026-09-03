@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models import (
     Application,
     DryRunFill,
+    EmailMessage,
     ManualTask,
     Scholarship,
     SystemEvent,
@@ -71,6 +72,10 @@ def dashboard_metrics(db: Session) -> DashboardMetrics:
             ValidationSnapshot.status == "passed"
         )
     ) or 0
+    email_messages = db.scalar(select(func.count()).select_from(EmailMessage)) or 0
+    email_actionable = db.scalar(
+        select(func.count()).select_from(EmailMessage).where(EmailMessage.is_actionable.is_(True))
+    ) or 0
     submitted = db.scalar(select(func.count()).select_from(Application).where(Application.submitted_at.is_not(None))) or 0
     submitted_week = db.scalar(
         select(func.count()).select_from(Application).where(Application.submitted_at >= week_start)
@@ -95,6 +100,8 @@ def dashboard_metrics(db: Session) -> DashboardMetrics:
         ready_for_preparation=ready_for_preparation,
         dry_runs_completed=dry_runs,
         validation_passes=validation_passes,
+        email_messages_tracked=email_messages,
+        email_actionable=email_actionable,
         applications_submitted=submitted,
         potential_awards_cents=potential,
         applications_this_week=submitted_week,

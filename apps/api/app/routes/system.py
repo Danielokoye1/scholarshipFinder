@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db import get_db
 from app.schemas import SystemSettingsRead, SystemSettingsWrite
 from app.services import get_or_create_settings, record_event
@@ -21,6 +22,11 @@ def update_settings(payload: SystemSettingsWrite, db: Session = Depends(get_db))
         raise HTTPException(status_code=409, detail="Automatic submission is unavailable until the live-mode safety gate is implemented")
     if updates.get("operating_mode") == "autonomous":
         raise HTTPException(status_code=409, detail="Autonomous mode is unavailable until the live-mode safety gate is implemented")
+    if updates.get("email_monitoring_enabled") and not settings.gmail_token_path.resolve().is_file():
+        raise HTTPException(
+            status_code=409,
+            detail="Connect the scholarship Gmail account before enabling email monitoring",
+        )
     for key, value in updates.items():
         setattr(current, key, value)
     record_event(db, "settings.updated", "Automation settings were updated")
@@ -76,4 +82,3 @@ def clear_emergency_stop(db: Session = Depends(get_db)):
     db.commit()
     db.refresh(current)
     return current
-

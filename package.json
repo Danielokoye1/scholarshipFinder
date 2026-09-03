@@ -11,7 +11,10 @@
     "test:api": "cd apps/api && ../../.venv/bin/pytest",
     "setup": "python3 -m venv .venv && .venv/bin/pip install -e 'apps/api[dev]' && npm install && npm run browser:check && npm run migrate",
     "browser:check": ".venv/bin/python scripts/check_browser.py",
-    "migrate": "cd apps/api && ../../.venv/bin/alembic upgrade head"
+    "migrate": "cd apps/api && ../../.venv/bin/alembic upgrade head",
+    "gmail:connect": "cd apps/api && ../../.venv/bin/python -m app.gmail_monitor connect",
+    "gmail:sync": "cd apps/api && ../../.venv/bin/python -m app.gmail_monitor sync",
+    "gmail:status": "cd apps/api && ../../.venv/bin/python -m app.gmail_monitor status"
   },
   "workspaces": [
     "apps/web"

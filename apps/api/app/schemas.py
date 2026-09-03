@@ -169,6 +169,8 @@ class DashboardMetrics(BaseModel):
     ready_for_preparation: int
     dry_runs_completed: int
     validation_passes: int
+    email_messages_tracked: int
+    email_actionable: int
     applications_submitted: int
     potential_awards_cents: int
     applications_this_week: int
@@ -184,6 +186,28 @@ class DashboardResponse(BaseModel):
     activity: list[ActivityRead]
     attention: list[dict[str, Any]]
     upcoming_deadlines: list[dict[str, Any]]
+    email_updates: list[dict[str, Any]]
+
+
+class EmailStatusRead(BaseModel):
+    provider: Literal["Gmail"]
+    client_credentials_present: bool
+    authorization_token_present: bool
+    monitoring_enabled: bool
+    scope: str
+    messages_indexed: int
+    actionable_messages: int
+    last_sync_at: datetime | None
+
+
+class EmailMessageRead(BaseModel):
+    provider_message_id: str
+    sender: str
+    subject: str
+    received_at: datetime
+    category: str
+    is_unread: bool
+    is_actionable: bool
 
 
 RuleOperator = Literal[

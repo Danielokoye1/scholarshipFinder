@@ -23,6 +23,7 @@ if settings.database_url.startswith("sqlite:///"):
 for private_directory in (
     settings.document_storage_path.resolve(),
     settings.screenshot_storage_path.resolve(),
+    settings.gmail_client_secret_path.resolve().parent,
 ):
     private_directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(private_directory, 0o700)

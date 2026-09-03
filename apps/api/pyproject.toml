@@ -4,12 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scholarship-finder-api"
-version = "0.6.7"
+version = "0.7.0"
 description = "Local API and multi-source profile intelligence for scholarshipFinder"
 requires-python = ">=3.11"
 dependencies = [
   "alembic>=1.14,<2",
   "fastapi>=0.115,<1",
+  "google-api-python-client>=2.160,<3",
+  "google-auth-httplib2>=0.2,<1",
+  "google-auth-oauthlib>=1.2,<2",
   "pydantic-settings>=2.7,<3",
   "playwright>=1.52,<2",
   "pypdf>=6.0,<7",

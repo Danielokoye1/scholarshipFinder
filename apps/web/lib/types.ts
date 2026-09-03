@@ -20,6 +20,8 @@ export type DashboardData = {
     ready_for_preparation: number;
     dry_runs_completed: number;
     validation_passes: number;
+    email_messages_tracked: number;
+    email_actionable: number;
     applications_submitted: number;
     potential_awards_cents: number;
     applications_this_week: number;
@@ -49,6 +51,15 @@ export type DashboardData = {
     provider: string | null;
     deadline: string;
     award_max_cents: number | null;
+  }>;
+  email_updates: Array<{
+    provider_message_id: string;
+    sender: string;
+    subject: string;
+    received_at: string;
+    category: string;
+    is_unread: boolean;
+    is_actionable: boolean;
   }>;
 };
 
