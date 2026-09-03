@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.browser.dry_run import DryRunFillError, scalar_value, value_hash
 from app.core.eligibility import evaluate_scholarship
 from app.core.priority import refresh_priority
+from app.core.profile_intelligence import profile_review
 from app.core.safety import assess_application_safety, persist_safety_assessment
 from app.core.state_machine import transition_application
 from app.core.submission_validation import (
@@ -179,6 +180,26 @@ def validate_submission(application_id: str, db: Session = Depends(get_db)) -> V
         else blocked("legitimacy", "Scholarship legitimacy is blocked or still requires review")
     )
     checks.append(deadline_check(scholarship.deadline, scholarship.deadline_type))
+
+    profile_intelligence = profile_review(db)
+    profile_errors = [
+        issue for issue in profile_intelligence["issues"] if issue["severity"] == "error"
+    ]
+    if profile_errors:
+        checks.extend(
+            blocked(
+                f"profile_intelligence_{issue['code']}",
+                issue["title"],
+            )
+            for issue in profile_errors
+        )
+    else:
+        checks.append(
+            passed(
+                "profile_intelligence",
+                "No cross-field or current-document profile conflicts were detected",
+            )
+        )
 
     evaluation_checks = evaluate_scholarship(db, scholarship)
     db.flush()

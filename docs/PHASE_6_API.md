@@ -29,10 +29,11 @@ Each snapshot records explicit pass/block results for:
 - CAPTCHA, 2FA, essay, recommendation, signature, attestation, upload, or unknown barriers
 - offline-fill completion and required-field coverage
 - current profile verification status, source, timestamp, type, and value hash
+- cross-field profile intelligence, including current-document conflicts and misplaced data
 - exactly one current auto-upload-approved document per recorded requirement
 - unresolved action-queue items
 
-Expired or ambiguous deadlines, changed pages, changed profile evidence, insufficient required-field evidence, suspicious legitimacy, destination changes, manual barriers, missing documents, ambiguous document selection, unresolved tasks, prior submissions, or any other failed check produce a `blocked` snapshot and a manual task.
+Expired or ambiguous deadlines, changed pages, changed profile evidence, cross-field profile conflicts, insufficient required-field evidence, suspicious legitimacy, destination changes, manual barriers, missing documents, ambiguous document selection, unresolved tasks, prior submissions, or any other failed check produce a `blocked` snapshot and a manual task.
 
 ## Immutability and privacy
 

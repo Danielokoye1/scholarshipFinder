@@ -33,6 +33,7 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Per-field provenance, freshness timestamps, and value hashes without duplicating raw answers
 - Idempotent dry-run evidence tied to the exact inspected page hash
 - Immutable pre-submission validation snapshots with explicit pass/block evidence
+- A readiness gate that blocks on cross-field profile or current-resume conflicts
 - Fresh deadline, legitimacy, eligibility, safety, page, profile, task, and document checks
 - Regression gates for changed pages, expired deadlines, ambiguous documents, and manual checkpoints
 

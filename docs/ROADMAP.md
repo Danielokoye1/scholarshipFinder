@@ -42,6 +42,7 @@
 - Local-only document corroboration and visible conflict handling
 - Verified-source derivation for full name and graduation year
 - Structural address checks with external deliverability verification intentionally disconnected
+- Immutable readiness validation blocks current-resume and cross-field profile conflicts
 
 ## Phase 7 — controlled submission (intentionally locked)
 

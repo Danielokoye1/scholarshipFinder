@@ -111,6 +111,7 @@ def test_pre_submission_validation_passes_without_enabling_submission(client, mo
     assert len(snapshot["validation_manifest_hash"]) == 64
     assert "3.42" not in response.text
     assert any(check["code"] == "live_submission_lock" for check in snapshot["checks"])
+    assert any(check["code"] == "profile_intelligence" for check in snapshot["checks"])
 
     detail = client.get(f"/api/applications/{application['id']}").json()
     assert detail["status"] == "ready_to_apply"
@@ -133,6 +134,24 @@ def test_profile_change_after_fill_blocks_validation(client, monkeypatch):
     detail = client.get(f"/api/applications/{application['id']}").json()
     assert detail["status"] == "needs_review"
     assert any(task["category"] == "submission_validation" for task in detail["tasks"])
+
+
+def test_profile_intelligence_error_blocks_validation(client, monkeypatch):
+    application = prepared_candidate(client, monkeypatch)
+    client.put(
+        "/api/profile/identity.residency",
+        json={"value": "123 Example Street", "status": "user_entered", "source": "User"},
+    )
+
+    response = client.post(f"/api/applications/{application['id']}/validate-submission")
+
+    assert response.status_code == 200
+    snapshot = response.json()
+    assert snapshot["status"] == "blocked"
+    assert any(
+        item["code"] == "profile_intelligence_misplaced_address_in_residency"
+        for item in snapshot["blockers"]
+    )
 
 
 def test_expired_deadline_blocks_validation(client, monkeypatch):
