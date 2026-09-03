@@ -100,6 +100,52 @@ FIELD_DEFINITIONS = (
         options=("Region 1", "Region 2", "Region 3", "Region 4", "Region 5", "Region 6"),
         help_text="Use the region shown in your NSBE account or chapter listing.",
     ),
+    FieldDefinition(
+        "preferences.discovery_scope",
+        "Discovery scope",
+        "strategy",
+        options=("Nationwide",),
+        help_text="Search nationally instead of limiting discovery to Michigan opportunities.",
+    ),
+    FieldDefinition(
+        "preferences.application_strategy",
+        "Application strategy",
+        "strategy",
+        options=("High-volume balanced", "Quality-first"),
+        help_text="High-volume balanced favors legitimate, lower-effort matches without relaxing eligibility checks.",
+    ),
+    FieldDefinition(
+        "preferences.volume_goal",
+        "Volume goal",
+        "strategy",
+        help_text="A planning goal only; it never authorizes a live submission.",
+    ),
+    FieldDefinition(
+        "preferences.essay_handling",
+        "Essay handling",
+        "strategy",
+        options=("Manual dashboard review", "Prepare draft for review"),
+    ),
+    FieldDefinition(
+        "preferences.financial_information_handling",
+        "Financial information handling",
+        "strategy",
+        options=("Manual dashboard review",),
+        help_text="Sensitive financial questions stay in your manual queue.",
+    ),
+    FieldDefinition(
+        "preferences.submission_approval",
+        "Live submission approval",
+        "strategy",
+        options=("Batch review before live submission", "Per-application review"),
+        help_text="A current approval checkpoint is required before anything is sent in your name.",
+    ),
+    FieldDefinition(
+        "preferences.status_cadence",
+        "Status cadence",
+        "strategy",
+        options=("Daily", "Weekly"),
+    ),
 )
 
 SECTION_TITLES = {
@@ -108,6 +154,7 @@ SECTION_TITLES = {
     "address": "Mailing address",
     "education": "Education",
     "affiliations": "Scholarship affiliations",
+    "strategy": "Application strategy",
 }
 
 US_STATES = {
@@ -199,7 +246,7 @@ def normalize_profile_value(field_key: str, value: Any) -> Any:
         if normalized is None:
             raise ValueError("Choose Full-time, Part-time, or Not currently enrolled")
         return normalized
-    if field_key in {"affiliations.nsbe_membership", "affiliations.nsbe_region"}:
+    if field_key in FIELD_BY_KEY and FIELD_BY_KEY[field_key].options:
         options = {item.casefold(): item for item in FIELD_BY_KEY[field_key].options}
         normalized = options.get(str(value).casefold())
         if normalized is None:

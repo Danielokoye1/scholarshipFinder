@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Application, ManualTask, Scholarship, SystemEvent, SystemSettings
+from app.models import Application, DryRunFill, ManualTask, Scholarship, SystemEvent, SystemSettings
 from app.schemas import DashboardMetrics
 
 
@@ -26,6 +26,25 @@ def record_event(db: Session, event_type: str, message: str, severity: str = "in
 
 def dashboard_metrics(db: Session) -> DashboardMetrics:
     week_start = datetime.now(UTC) - timedelta(days=7)
+    opportunities = db.scalar(select(func.count()).select_from(Scholarship)) or 0
+    likely_eligible = db.scalar(
+        select(func.count())
+        .select_from(Scholarship)
+        .where(Scholarship.eligibility_status.in_({"eligible", "probably_eligible"}))
+    ) or 0
+    needs_information = db.scalar(
+        select(func.count())
+        .select_from(Scholarship)
+        .where(Scholarship.eligibility_status == "needs_information")
+    ) or 0
+    ineligible = db.scalar(
+        select(func.count())
+        .select_from(Scholarship)
+        .where(Scholarship.eligibility_status == "ineligible")
+    ) or 0
+    dry_runs = db.scalar(
+        select(func.count()).select_from(DryRunFill).where(DryRunFill.status == "completed")
+    ) or 0
     submitted = db.scalar(select(func.count()).select_from(Application).where(Application.submitted_at.is_not(None))) or 0
     submitted_week = db.scalar(
         select(func.count()).select_from(Application).where(Application.submitted_at >= week_start)
@@ -42,6 +61,11 @@ def dashboard_metrics(db: Session) -> DashboardMetrics:
         .where(Application.status.not_in({"ineligible", "rejected", "expired"}))
     ) or 0
     return DashboardMetrics(
+        opportunities_tracked=opportunities,
+        likely_eligible=likely_eligible,
+        needs_information=needs_information,
+        ineligible_filtered=ineligible,
+        dry_runs_completed=dry_runs,
         applications_submitted=submitted,
         potential_awards_cents=potential,
         applications_this_week=submitted_week,
@@ -50,4 +74,3 @@ def dashboard_metrics(db: Session) -> DashboardMetrics:
         awards_won=won,
         total_won_cents=total_won,
     )
-

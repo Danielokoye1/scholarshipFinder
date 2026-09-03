@@ -126,6 +126,46 @@ def test_profile_supports_scholarship_affiliation_context(client):
     assert field_from_overview(body, "affiliations.nsbe_region")["value"] == "Region 4"
 
 
+def test_profile_persists_high_volume_strategy_without_authorizing_submission(client):
+    response = client.put(
+        "/api/profile/overview",
+        json={
+            "items": [
+                {
+                    "field_key": "preferences.discovery_scope",
+                    "value": "nationwide",
+                    "status": "user_entered",
+                    "source": "User confirmed",
+                },
+                {
+                    "field_key": "preferences.application_strategy",
+                    "value": "high-volume balanced",
+                    "status": "user_entered",
+                    "source": "User confirmed",
+                },
+                {
+                    "field_key": "preferences.submission_approval",
+                    "value": "batch review before live submission",
+                    "status": "user_entered",
+                    "source": "User confirmed",
+                },
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert field_from_overview(body, "preferences.discovery_scope")["value"] == "Nationwide"
+    assert (
+        field_from_overview(body, "preferences.application_strategy")["value"]
+        == "High-volume balanced"
+    )
+    assert (
+        field_from_overview(body, "preferences.submission_approval")["value"]
+        == "Batch review before live submission"
+    )
+
+
 def test_profile_keeps_self_identification_separate_from_citizenship(client):
     response = client.put(
         "/api/profile/overview",

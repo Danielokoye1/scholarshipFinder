@@ -9,10 +9,11 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Local resume corroboration with no extracted document text stored in the database
 - Deterministic email, phone, state, ZIP, GPA, graduation, class-standing, and enrollment checks
 - Sensitive self-identification fields kept distinct from citizenship and used only for local matching
+- A persisted application strategy for nationwide, high-volume discovery with manual essay and financial review
 - Derived full-name and graduation-year facts only when their source fields are verified
 - A local document vault with checksums and explicit auto-upload approval
 - Safe document versioning that uses the newest profile source and revokes stale upload approvals
-- A database-driven dashboard (no fabricated production metrics)
+- A database-driven dashboard with discovered, eligible, unresolved, filtered, dry-run, submission, and award counts
 - Persistent automation controls, including pause and emergency stop
 - A durable activity log
 - SQLite migrations and API regression tests
@@ -80,6 +81,7 @@ npm run migrate
 - External browser use remains read-only: no profile values, cookies, login state, uploads, clicks, form writes, or submissions.
 - Phase 5 fill tests occur only in locally generated, script-free pages with all network requests blocked.
 - A passing Phase 6 validation is evidence only; it does not authorize, unlock, or attempt submission.
+- High-volume and batch-review preferences are planning controls only; each live batch still requires a current approval before external data entry or submission.
 - Every distinct application domain starts unapproved; listing-page trust never substitutes for a verified application destination.
 - HTTPS, direct-IP, unusual-port, payment, banking, identity, and signature rules are checked before a workflow can become ready.
 - Security-clearance, background-check, employment, and service commitments always remain explicit review gates.

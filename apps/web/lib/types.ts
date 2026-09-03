@@ -12,6 +12,11 @@ export type Settings = {
 
 export type DashboardData = {
   metrics: {
+    opportunities_tracked: number;
+    likely_eligible: number;
+    needs_information: number;
+    ineligible_filtered: number;
+    dry_runs_completed: number;
     applications_submitted: number;
     potential_awards_cents: number;
     applications_this_week: number;

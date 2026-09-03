@@ -10,6 +10,11 @@ export default async function DashboardPage() {
   const data = await api.dashboard().catch(() => null);
   if (!data) return <div className="page"><PageHeading eyebrow="Overview" title="Dashboard" description="Your local scholarship operations at a glance." /><ApiUnavailable /></div>;
   const metrics = [
+    ["Opportunities tracked", data.metrics.opportunities_tracked.toLocaleString()],
+    ["Likely eligible", data.metrics.likely_eligible.toLocaleString()],
+    ["Needs information", data.metrics.needs_information.toLocaleString()],
+    ["Ineligible filtered", data.metrics.ineligible_filtered.toLocaleString()],
+    ["Dry runs completed", data.metrics.dry_runs_completed.toLocaleString()],
     ["Applications submitted", data.metrics.applications_submitted.toLocaleString()],
     ["Potential awards", currency.format(data.metrics.potential_awards_cents / 100)],
     ["Applications this week", data.metrics.applications_this_week.toLocaleString()],
@@ -32,4 +37,3 @@ export default async function DashboardPage() {
     </div>
   );
 }
-
