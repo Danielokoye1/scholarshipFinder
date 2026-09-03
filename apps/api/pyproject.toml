@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scholarship-finder-api"
-version = "0.6.6"
+version = "0.6.7"
 description = "Local API and multi-source profile intelligence for scholarshipFinder"
 requires-python = ">=3.11"
 dependencies = [

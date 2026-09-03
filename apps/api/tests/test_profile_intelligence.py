@@ -149,6 +149,12 @@ def test_profile_persists_high_volume_strategy_without_authorizing_submission(cl
                     "status": "user_entered",
                     "source": "User confirmed",
                 },
+                {
+                    "field_key": "preferences.daily_discovery_target",
+                    "value": "25",
+                    "status": "user_entered",
+                    "source": "User confirmed",
+                },
             ]
         },
     )
@@ -164,6 +170,17 @@ def test_profile_persists_high_volume_strategy_without_authorizing_submission(cl
         field_from_overview(body, "preferences.submission_approval")["value"]
         == "Batch review before live submission"
     )
+    assert field_from_overview(body, "preferences.daily_discovery_target")["value"] == 25
+
+
+def test_profile_rejects_unbounded_campaign_targets(client):
+    response = client.put(
+        "/api/profile/preferences.daily_discovery_target",
+        json={"value": 501, "status": "user_entered", "source": "User"},
+    )
+
+    assert response.status_code == 422
+    assert "between 1 and 500" in response.json()["detail"]
 
 
 def test_profile_keeps_self_identification_separate_from_citizenship(client):

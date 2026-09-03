@@ -52,6 +52,13 @@ FIELD_DEFINITIONS = (
         help_text="For example: U.S. resident, permanent resident, or international student.",
     ),
     FieldDefinition("contact.email", "Email", "contact", "email", important=True),
+    FieldDefinition(
+        "contact.email_provider",
+        "Scholarship mailbox provider",
+        "contact",
+        options=("Gmail", "Outlook", "Other"),
+        help_text="This records the provider only; it does not connect or authorize mailbox access.",
+    ),
     FieldDefinition("contact.phone", "Phone", "contact", "tel", important=True),
     FieldDefinition("address.street", "Street address", "address", important=True, sensitive=True),
     FieldDefinition("address.line_2", "Apartment / unit", "address", sensitive=True),
@@ -119,6 +126,20 @@ FIELD_DEFINITIONS = (
         "Volume goal",
         "strategy",
         help_text="A planning goal only; it never authorizes a live submission.",
+    ),
+    FieldDefinition(
+        "preferences.daily_discovery_target",
+        "Daily candidate review target",
+        "strategy",
+        "number",
+        help_text="How many candidate pages the daily scan should aim to evaluate before deduplication.",
+    ),
+    FieldDefinition(
+        "preferences.weekly_preparation_target",
+        "Weekly preparation target",
+        "strategy",
+        "number",
+        help_text="How many safe, eligible applications the workflow should aim to prepare for review each week.",
     ),
     FieldDefinition(
         "preferences.essay_handling",
@@ -201,6 +222,17 @@ def normalize_profile_value(field_key: str, value: Any) -> Any:
             raise ValueError("GPA values must be numeric") from error
         if number < 0 or number > 5:
             raise ValueError("GPA values must be between 0 and 5")
+        return number
+    if field_key in {
+        "preferences.daily_discovery_target",
+        "preferences.weekly_preparation_target",
+    }:
+        try:
+            number = int(value)
+        except (TypeError, ValueError) as error:
+            raise ValueError("Targets must be whole numbers") from error
+        if number < 1 or number > 500:
+            raise ValueError("Targets must be between 1 and 500")
         return number
     if field_key == "contact.email":
         normalized = str(value).casefold()

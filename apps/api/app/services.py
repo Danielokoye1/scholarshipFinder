@@ -3,7 +3,15 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Application, DryRunFill, ManualTask, Scholarship, SystemEvent, SystemSettings
+from app.models import (
+    Application,
+    DryRunFill,
+    ManualTask,
+    Scholarship,
+    SystemEvent,
+    SystemSettings,
+    ValidationSnapshot,
+)
 from app.schemas import DashboardMetrics
 
 
@@ -27,6 +35,9 @@ def record_event(db: Session, event_type: str, message: str, severity: str = "in
 def dashboard_metrics(db: Session) -> DashboardMetrics:
     week_start = datetime.now(UTC) - timedelta(days=7)
     opportunities = db.scalar(select(func.count()).select_from(Scholarship)) or 0
+    opportunities_week = db.scalar(
+        select(func.count()).select_from(Scholarship).where(Scholarship.created_at >= week_start)
+    ) or 0
     likely_eligible = db.scalar(
         select(func.count())
         .select_from(Scholarship)
@@ -45,6 +56,21 @@ def dashboard_metrics(db: Session) -> DashboardMetrics:
     dry_runs = db.scalar(
         select(func.count()).select_from(DryRunFill).where(DryRunFill.status == "completed")
     ) or 0
+    ready_for_preparation = db.scalar(
+        select(func.count())
+        .select_from(Application)
+        .join(Scholarship, Scholarship.id == Application.scholarship_id)
+        .where(
+            Application.status == "ready_to_apply",
+            Application.safety_status == "approved",
+            Scholarship.eligibility_status == "eligible",
+        )
+    ) or 0
+    validation_passes = db.scalar(
+        select(func.count(func.distinct(ValidationSnapshot.application_id))).where(
+            ValidationSnapshot.status == "passed"
+        )
+    ) or 0
     submitted = db.scalar(select(func.count()).select_from(Application).where(Application.submitted_at.is_not(None))) or 0
     submitted_week = db.scalar(
         select(func.count()).select_from(Application).where(Application.submitted_at >= week_start)
@@ -62,10 +88,13 @@ def dashboard_metrics(db: Session) -> DashboardMetrics:
     ) or 0
     return DashboardMetrics(
         opportunities_tracked=opportunities,
+        opportunities_this_week=opportunities_week,
         likely_eligible=likely_eligible,
         needs_information=needs_information,
         ineligible_filtered=ineligible,
+        ready_for_preparation=ready_for_preparation,
         dry_runs_completed=dry_runs,
+        validation_passes=validation_passes,
         applications_submitted=submitted,
         potential_awards_cents=potential,
         applications_this_week=submitted_week,

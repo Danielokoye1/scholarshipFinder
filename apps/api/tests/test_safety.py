@@ -4,10 +4,13 @@ def test_dashboard_starts_with_real_empty_metrics(client):
     data = response.json()
     assert data["metrics"] == {
         "opportunities_tracked": 0,
+        "opportunities_this_week": 0,
         "likely_eligible": 0,
         "needs_information": 0,
         "ineligible_filtered": 0,
+        "ready_for_preparation": 0,
         "dry_runs_completed": 0,
+        "validation_passes": 0,
         "applications_submitted": 0,
         "potential_awards_cents": 0,
         "applications_this_week": 0,

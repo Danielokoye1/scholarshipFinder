@@ -10,6 +10,7 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Deterministic email, phone, state, ZIP, GPA, graduation, class-standing, and enrollment checks
 - Sensitive self-identification fields kept distinct from citizenship and used only for local matching
 - A persisted application strategy for nationwide, high-volume discovery with manual essay and financial review
+- Bounded daily discovery and weekly preparation targets that measure campaign throughput
 - Derived full-name and graduation-year facts only when their source fields are verified
 - A local document vault with checksums and explicit auto-upload approval
 - Safe document versioning that uses the newest profile source and revokes stale upload approvals
@@ -27,6 +28,7 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Local application-domain approvals and blocks with review notes
 - A durable application state machine and append-only event history
 - A priority-ranked action queue and transparent ranking weights
+- Hard-zero priority for deterministically ineligible or expired opportunities so they cannot consume campaign capacity
 - Requirement-specific action items that identify exactly which eligibility facts remain unresolved
 - Opportunities, applications, safety review, and action queue interfaces
 - Playwright inspection through a fresh, non-persistent Chrome context
@@ -86,5 +88,6 @@ npm run migrate
 - HTTPS, direct-IP, unusual-port, payment, banking, identity, and signature rules are checked before a workflow can become ready.
 - Security-clearance, background-check, employment, and service commitments always remain explicit review gates.
 - Supabase and other cloud services are intentionally not connected. Data remains in this repository's ignored `storage/` tree.
+- Recording Gmail as the mailbox provider does not grant inbox access; future monitoring must use a separate read-only OAuth connection and locally protected tokens.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SAFETY_MODEL.md](docs/SAFETY_MODEL.md), [docs/PROFILE_INTELLIGENCE.md](docs/PROFILE_INTELLIGENCE.md), [docs/ISOLATION.md](docs/ISOLATION.md), [docs/PHASE_2_API.md](docs/PHASE_2_API.md), [docs/PHASE_3_API.md](docs/PHASE_3_API.md), [docs/PHASE_4_API.md](docs/PHASE_4_API.md), [docs/PHASE_5_API.md](docs/PHASE_5_API.md), [docs/PHASE_6_API.md](docs/PHASE_6_API.md), [docs/SECURITY_AUDIT_PHASE_6.md](docs/SECURITY_AUDIT_PHASE_6.md), and [docs/ROADMAP.md](docs/ROADMAP.md).

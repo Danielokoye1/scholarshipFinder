@@ -225,6 +225,10 @@ def test_unknown_and_failed_eligibility_have_distinct_terminal_workflow_states(c
         "/api/applications", json={"scholarship_id": failed_scholarship["scholarship_id"]}
     ).json()
     assert failed["status"] == "ineligible"
+    failed_detail = client.get(
+        f"/api/scholarships/{failed_scholarship['scholarship_id']}"
+    ).json()
+    assert failed_detail["priority_score"] == 0
 
 
 def test_transition_uses_optimistic_version_guard(client):

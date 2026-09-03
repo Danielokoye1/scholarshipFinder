@@ -10,7 +10,7 @@ const toggles: Array<[keyof Settings, string, string]> = [
   ["eligibility_enabled", "Eligibility checking", "Evaluate extracted rules against verified data"],
   ["preparation_enabled", "Application preparation", "Allow inspection, offline filling, and validation in Dry Run mode"],
   ["automatic_submission_enabled", "Automatic submission", "Safety-gated until the controlled-submission phase"],
-  ["email_monitoring_enabled", "Email monitoring", "Not connected in Phase 6"],
+  ["email_monitoring_enabled", "Email monitoring", "Gmail identified; read-only OAuth is not connected yet"],
 ];
 
 export function SettingsPanel({ initial }: { initial: Settings }) {

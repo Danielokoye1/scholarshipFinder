@@ -162,10 +162,13 @@ class ActivityRead(BaseModel):
 
 class DashboardMetrics(BaseModel):
     opportunities_tracked: int
+    opportunities_this_week: int
     likely_eligible: int
     needs_information: int
     ineligible_filtered: int
+    ready_for_preparation: int
     dry_runs_completed: int
+    validation_passes: int
     applications_submitted: int
     potential_awards_cents: int
     applications_this_week: int

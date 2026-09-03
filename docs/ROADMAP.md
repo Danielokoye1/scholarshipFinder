@@ -52,6 +52,8 @@
 
 ## Phase 8+ — controlled operation
 
-- Durable workers, response tracking, email integration, and additional source adapters
+- Durable workers, response tracking, and additional source adapters
+- Read-only Gmail OAuth with least-privilege scopes, local token protection, metadata-first storage, and revocation controls
+- Campaign throughput reporting against bounded daily discovery and weekly preparation targets
 
 Live submission must remain unavailable until the safety regression suite, dry runs, recovery behavior, audit evidence, and emergency stop have all been validated.

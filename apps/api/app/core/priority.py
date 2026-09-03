@@ -19,11 +19,17 @@ def calculate_priority(
     settings: PrioritySettings,
     application: Application | None = None,
 ) -> float:
+    if scholarship.eligibility_status == "ineligible":
+        return 0.0
+    if scholarship.deadline is not None:
+        deadline = scholarship.deadline
+        if deadline.tzinfo is None:
+            deadline = deadline.replace(tzinfo=UTC)
+        if deadline < datetime.now(UTC):
+            return 0.0
     eligibility = (
         scholarship.eligibility_score
         if scholarship.eligibility_status == "eligible"
-        else 0.0
-        if scholarship.eligibility_status == "ineligible"
         else scholarship.eligibility_score * 0.5
     )
     award = min((scholarship.award_max_cents or 0) / settings.award_reference_cents, 1.0)
@@ -62,4 +68,3 @@ def refresh_priority(
     if application:
         application.priority_score = score
     return score
-
