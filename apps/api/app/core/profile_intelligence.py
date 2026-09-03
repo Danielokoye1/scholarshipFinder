@@ -334,9 +334,15 @@ def materialize_derived_fields(db: Session) -> bool:
 
     changed = False
     managed_keys = {"identity.full_name", "education.graduation_year"}
+
+    def is_managed_derived(item: ProfileField) -> bool:
+        return (item.source or "").startswith(
+            ("Derived by profile intelligence", "Derived value unavailable")
+        )
+
     for field_key, (value, source, inputs) in derived.items():
         item = fields.get(field_key)
-        if item is not None and not (item.source or "").startswith("Derived by profile intelligence"):
+        if item is not None and not is_managed_derived(item):
             continue
         if item is None:
             item = ProfileField(field_key=field_key)
@@ -351,7 +357,7 @@ def materialize_derived_fields(db: Session) -> bool:
 
     for field_key in managed_keys - derived.keys():
         item = fields.get(field_key)
-        if item is None or not (item.source or "").startswith("Derived by profile intelligence"):
+        if item is None or not is_managed_derived(item):
             continue
         if item.value_json is not None or item.status != "unknown":
             item.value_json = None

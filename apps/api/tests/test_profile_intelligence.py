@@ -58,6 +58,29 @@ def test_profile_overview_saves_multiple_inputs_and_derives_context(client):
     assert by_key["education.graduation_year"]["value"] == 2028
 
 
+def test_derived_graduation_year_recovers_after_source_is_reverified(client):
+    verified = {
+        "value": "Fall 2028",
+        "status": "verified",
+        "source": "User confirmed",
+    }
+    assert client.put("/api/profile/education.graduation_date", json=verified).status_code == 200
+
+    cleared = client.put(
+        "/api/profile/education.graduation_date",
+        json={"value": None, "status": "unknown", "source": None},
+    )
+    assert cleared.status_code == 200
+    unavailable = {item["field_key"]: item for item in client.get("/api/profile").json()}
+    assert unavailable["education.graduation_year"]["value"] is None
+    assert unavailable["education.graduation_year"]["status"] == "unknown"
+
+    assert client.put("/api/profile/education.graduation_date", json=verified).status_code == 200
+    restored = {item["field_key"]: item for item in client.get("/api/profile").json()}
+    assert restored["education.graduation_year"]["value"] == 2028
+    assert restored["education.graduation_year"]["status"] == "verified"
+
+
 def test_profile_normalizes_contact_and_address_fields(client):
     response = client.put(
         "/api/profile/overview",
