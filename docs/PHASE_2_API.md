@@ -35,6 +35,10 @@ The interactive API reference is available at <http://127.0.0.1:8217/docs> while
 
 The source quote must appear in `source_text`. This prevents an extracted rule from being stored without evidence.
 
+Source URLs are canonicalized for matching: tracking parameters and fragments are removed. Application URLs use the same cleanup but retain meaningful route fragments because some application portals encode the exact competition in the fragment.
+
+When a verified repeat source matches an existing scholarship, ingestion may add a previously missing application destination or enrich the same portal URL with its route fragment. It does not replace a different stored destination; conflicts are retained for review and recorded in the event trail. Any still-open local workflow task that pointed to the source or fragmentless portal is synchronized to the enriched route.
+
 ## Read and reevaluate
 
 - `GET /api/scholarships` — paginated search and status filters

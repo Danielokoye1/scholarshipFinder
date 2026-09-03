@@ -8,6 +8,7 @@
 
 - Scholarship ingestion, normalized sources, deterministic deduplication, eligibility rules and evidence
 - Canonical URL cleanup, source hashes, legitimacy screening, and repeatable reevaluation
+- Conservative routed-destination enrichment with conflict preservation and open-task synchronization
 
 ## Phase 3 — safe workflow (implemented)
 

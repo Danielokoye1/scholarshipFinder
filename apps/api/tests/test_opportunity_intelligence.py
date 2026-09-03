@@ -87,6 +87,74 @@ def test_exact_url_duplicate_is_linked_not_recreated(client):
     assert client.get("/api/scholarships").json()["total"] == 1
 
 
+def test_duplicate_source_can_enrich_a_missing_application_destination(client):
+    first = client.post(
+        "/api/scholarships/ingest",
+        json=scholarship_payload(application_url=None),
+    ).json()
+    destination = "https://apply.example.org/future-engineers"
+
+    duplicate = client.post(
+        "/api/scholarships/ingest",
+        json=scholarship_payload(application_url=destination),
+    )
+
+    assert duplicate.status_code == 200
+    detail = client.get(f"/api/scholarships/{first['scholarship_id']}").json()
+    assert detail["application_url"] == destination
+
+
+def test_duplicate_source_does_not_replace_a_conflicting_destination(client):
+    first = client.post("/api/scholarships/ingest", json=scholarship_payload()).json()
+
+    duplicate = client.post(
+        "/api/scholarships/ingest",
+        json=scholarship_payload(application_url="https://different.example.org/apply"),
+    )
+
+    assert duplicate.status_code == 200
+    detail = client.get(f"/api/scholarships/{first['scholarship_id']}").json()
+    assert detail["application_url"] == "https://apply.example.org/future-engineers"
+
+
+def test_application_route_fragment_is_preserved_and_can_enrich_a_portal_url(client):
+    first = client.post(
+        "/api/scholarships/ingest",
+        json=scholarship_payload(application_url="https://portal.example.org/"),
+    ).json()
+    routed_url = "https://portal.example.org/#competition/2025940"
+
+    duplicate = client.post(
+        "/api/scholarships/ingest",
+        json=scholarship_payload(application_url=routed_url),
+    )
+
+    assert duplicate.status_code == 200
+    detail = client.get(f"/api/scholarships/{first['scholarship_id']}").json()
+    assert detail["application_url"] == routed_url
+
+
+def test_destination_enrichment_updates_open_workflow_task_link(client):
+    first = client.post(
+        "/api/scholarships/ingest",
+        json=scholarship_payload(application_url=None),
+    ).json()
+    application = client.post(
+        "/api/applications",
+        json={"scholarship_id": first["scholarship_id"]},
+    ).json()
+    assert application["tasks"][0]["direct_url"] == "https://example.org/scholarships/future-engineers"
+    routed_url = "https://portal.example.org/#competition/2025940"
+
+    client.post(
+        "/api/scholarships/ingest",
+        json=scholarship_payload(application_url=routed_url),
+    )
+
+    refreshed = client.get(f"/api/applications/{application['id']}").json()
+    assert refreshed["tasks"][0]["direct_url"] == routed_url
+
+
 def test_same_provider_and_equivalent_title_are_detected_across_directories(client):
     first = client.post("/api/scholarships/ingest", json=scholarship_payload()).json()
     second_payload = scholarship_payload(

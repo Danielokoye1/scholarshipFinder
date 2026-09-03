@@ -42,7 +42,7 @@ def normalized_label(value: str | None) -> str | None:
     return re.sub(r"[^a-z0-9]+", " ", cleaned).strip()
 
 
-def canonicalize_url(value: str) -> str:
+def canonicalize_url(value: str, *, preserve_fragment: bool = False) -> str:
     parsed = urlsplit(clean_text(value))
     if parsed.scheme.casefold() not in {"http", "https"} or not parsed.hostname:
         raise ValueError("Scholarship URLs must use http or https and include a hostname")
@@ -71,7 +71,8 @@ def canonicalize_url(value: str) -> str:
         ),
         doseq=True,
     )
-    return urlunsplit((scheme, netloc, path, query, ""))
+    fragment = parsed.fragment if preserve_fragment else ""
+    return urlunsplit((scheme, netloc, path, query, fragment))
 
 
 def content_hash(text: str) -> str:

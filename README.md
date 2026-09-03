@@ -18,6 +18,7 @@ A private, local-first scholarship workflow system. The project is intentionally
 - Localhost-only API defaults
 - Structured scholarship ingestion with source evidence
 - Deterministic URL normalization and duplicate detection
+- Conservative duplicate-source enrichment that adds missing routed destinations without overwriting conflicts
 - Rule-based eligibility evaluation with profile-value snapshots
 - Conservative scholarship legitimacy screening
 - A default-deny application destination safety gate

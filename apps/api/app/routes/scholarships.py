@@ -22,6 +22,7 @@ from app.config import settings
 from app.models import (
     EligibilityCheck,
     EligibilityRule,
+    ManualTask,
     Scholarship,
     ScholarshipSource,
     SourceEvidence,
@@ -63,10 +64,24 @@ def timezone_offset(value: datetime | None) -> str | None:
 def normalize_urls(payload: ScholarshipIngest) -> tuple[str, str | None]:
     try:
         source_url = canonicalize_url(payload.source_url)
-        application_url = canonicalize_url(payload.application_url) if payload.application_url else None
+        application_url = (
+            canonicalize_url(payload.application_url, preserve_fragment=True)
+            if payload.application_url
+            else None
+        )
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
     return source_url, application_url
+
+
+def adds_route_fragment(current_url: str, candidate_url: str) -> bool:
+    current = urlsplit(current_url)
+    candidate = urlsplit(candidate_url)
+    return bool(
+        not current.fragment
+        and candidate.fragment
+        and current._replace(fragment="") == candidate._replace(fragment="")
+    )
 
 
 def summary(item: Scholarship) -> ScholarshipSummary:
@@ -201,6 +216,44 @@ def ingest_scholarship(
     )
     if duplicate:
         response.status_code = status.HTTP_200_OK
+        if application_url is not None and (
+            duplicate.scholarship.application_url is None
+            or adds_route_fragment(duplicate.scholarship.application_url, application_url)
+        ):
+            duplicate.scholarship.application_url = application_url
+            record_event(
+                db,
+                "scholarship.destination_enriched",
+                f"Added a verified application destination for {duplicate.scholarship.canonical_name}",
+            )
+        elif (
+            application_url is not None
+            and duplicate.scholarship.application_url is not None
+            and application_url != duplicate.scholarship.application_url
+        ):
+            record_event(
+                db,
+                "scholarship.destination_conflict",
+                f"A conflicting application destination requires review for {duplicate.scholarship.canonical_name}",
+                "warning",
+            )
+        if (
+            application_url is not None
+            and duplicate.scholarship.application_url == application_url
+        ):
+            fragmentless_destination = urlsplit(application_url)._replace(fragment="").geturl()
+            for task in db.scalars(
+                select(ManualTask).where(
+                    ManualTask.scholarship_id == duplicate.scholarship.id,
+                    ManualTask.status == "open",
+                )
+            ):
+                if task.direct_url in {
+                    None,
+                    fragmentless_destination,
+                    duplicate.scholarship.source_url,
+                }:
+                    task.direct_url = application_url
         attach_source(db, duplicate.scholarship, source_url, payload.source_adapter, payload.source_text)
         add_source_evidence(
             db, duplicate.scholarship, source_url, payload.source_text, "discovery_source"
