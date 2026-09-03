@@ -640,7 +640,8 @@ def profile_review(db: Session) -> dict[str, Any]:
             )
 
     for document_text in document_texts:
-        if document_text.status != "readable":
+        is_latest = latest_by_type.get(document_text.document.document_type) == document_text.document.id
+        if document_text.status != "readable" and is_latest:
             issues.append(
                 make_issue(
                     f"document_{document_text.document.id}_{document_text.status}",

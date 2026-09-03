@@ -352,6 +352,44 @@ def test_new_document_version_revokes_older_upload_approval(client):
     assert next(item for item in resume_checks if item["version"] == "WN26")["is_latest"] is True
 
 
+def test_profile_warning_ignores_unreadable_historical_document(client, monkeypatch):
+    first = client.post(
+        "/api/documents",
+        files={"file": ("transcript-locked.pdf", b"%PDF locked", "application/pdf")},
+        data={"document_type": "transcript", "version": "1"},
+    )
+    second = client.post(
+        "/api/documents",
+        files={"file": ("transcript-readable.pdf", b"%PDF readable", "application/pdf")},
+        data={"document_type": "transcript", "version": "2"},
+    )
+    assert first.status_code == 201
+    assert second.status_code == 201
+
+    def document_text(document):
+        return LocalDocumentText(
+            document=document,
+            status="locked" if document.version == "1" else "readable",
+            text="" if document.version == "1" else "Unofficial Transcript",
+            page_count=2,
+        )
+
+    monkeypatch.setattr("app.core.profile_intelligence.read_local_document", document_text)
+    overview = client.get("/api/profile/overview").json()
+    warning_codes = {
+        item["code"]
+        for item in overview["issues"]
+        if item["severity"] in {"warning", "error"}
+    }
+
+    assert f"document_{first.json()['id']}_locked" not in warning_codes
+    historical = next(
+        item for item in overview["document_checks"] if item["document_id"] == first.json()["id"]
+    )
+    assert historical["status"] == "locked"
+    assert historical["is_latest"] is False
+
+
 def test_profile_intelligence_uses_latest_resume_version(client, monkeypatch):
     for version in ("1", "WN26"):
         response = client.post(
