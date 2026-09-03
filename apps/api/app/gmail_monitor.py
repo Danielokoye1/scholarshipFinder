@@ -111,7 +111,7 @@ def gmail_service(*, interactive: bool) -> Any:
         flow = InstalledAppFlow.from_client_secrets_file(str(client_path), SCOPES)
         credentials = flow.run_local_server(
             port=0,
-            authorization_prompt_message="Authorize the scholarship Gmail account in the opened browser.",
+            authorization_prompt_message="Authorize the scholarship Gmail account here: {url}",
             success_message="Gmail authorization completed. You may close this tab.",
         )
 
