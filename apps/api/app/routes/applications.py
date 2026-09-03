@@ -18,6 +18,8 @@ from app.models import (
     ApplicationEvent,
     BrowserRun,
     DryRunFill,
+    EligibilityCheck,
+    EligibilityRule,
     ManualTask,
     SafetyAssessment,
     Scholarship,
@@ -37,6 +39,25 @@ from app.schemas import (
 from app.services import record_event
 
 router = APIRouter(prefix="/api/applications", tags=["applications"])
+
+
+def unresolved_eligibility_action(db: Session, scholarship: Scholarship) -> str:
+    requirements = list(
+        db.scalars(
+            select(EligibilityRule.requirement_text)
+            .join(EligibilityCheck, EligibilityCheck.rule_id == EligibilityRule.id)
+            .where(
+                EligibilityRule.scholarship_id == scholarship.id,
+                EligibilityCheck.is_current.is_(True),
+                EligibilityCheck.result.in_({"unknown", "needs_verification"}),
+            )
+            .order_by(EligibilityRule.created_at, EligibilityRule.id)
+            .limit(5)
+        )
+    )
+    if not requirements:
+        return "Review the unknown eligibility checks and add only verified profile information."
+    return "Confirm these unresolved requirements: " + "; ".join(requirements)
 
 
 def task_read(task: ManualTask) -> ManualTaskRead:
@@ -262,7 +283,7 @@ def create_application(
             scholarship,
             category="verify_information",
             title=f"Verify eligibility for {scholarship.canonical_name}",
-            required_action="Review the unknown eligibility checks and add only verified profile information.",
+            required_action=unresolved_eligibility_action(db, scholarship),
         )
     elif safety.status != "approved":
         transition_application(

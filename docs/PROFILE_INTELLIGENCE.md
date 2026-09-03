@@ -20,6 +20,8 @@ Changing a verified field in the interface changes its status to `user_entered`.
 - GPA can be corroborated against a readable document, and a missing GPA scale can be suggested for confirmation.
 - Institution, major, name, and graduation timing can be compared with readable local documents.
 - Email, US phone, state, ZIP code, GPA, class standing, and enrollment status use deterministic format validation.
+- Optional race/ethnicity and national-origin/heritage facts remain separate from citizenship and residency. They are stored only when the user self-identifies, marked sensitive, and may be used for local eligibility matching.
+- Scholarship-specific affiliation facts, such as paid NSBE membership and NSBE region, have explicit profile fields instead of being inferred from demographic identity or school location.
 
 ## Document privacy
 

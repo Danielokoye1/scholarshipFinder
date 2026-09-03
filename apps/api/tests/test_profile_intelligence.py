@@ -81,6 +81,12 @@ def test_profile_normalizes_contact_and_address_fields(client):
                     "status": "user_entered",
                     "source": "User",
                 },
+                {
+                    "field_key": "identity.citizenship",
+                    "value": "American Citizen",
+                    "status": "verified",
+                    "source": "User-reviewed document",
+                },
             ]
         },
     )
@@ -90,6 +96,66 @@ def test_profile_normalizes_contact_and_address_fields(client):
     assert field_from_overview(body, "contact.email")["value"] == "student@example.com"
     assert field_from_overview(body, "contact.phone")["value"] == "(734) 555-0100"
     assert field_from_overview(body, "address.state")["value"] == "MI"
+    assert field_from_overview(body, "identity.citizenship")["value"] == "U.S. Citizen"
+
+
+def test_profile_supports_scholarship_affiliation_context(client):
+    response = client.put(
+        "/api/profile/overview",
+        json={
+            "items": [
+                {
+                    "field_key": "affiliations.nsbe_membership",
+                    "value": "unsure",
+                    "status": "user_entered",
+                    "source": "User",
+                },
+                {
+                    "field_key": "affiliations.nsbe_region",
+                    "value": "region 4",
+                    "status": "user_entered",
+                    "source": "User",
+                },
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert field_from_overview(body, "affiliations.nsbe_membership")["value"] == "Unsure"
+    assert field_from_overview(body, "affiliations.nsbe_region")["value"] == "Region 4"
+
+
+def test_profile_keeps_self_identification_separate_from_citizenship(client):
+    response = client.put(
+        "/api/profile/overview",
+        json={
+            "items": [
+                {
+                    "field_key": "identity.national_origin",
+                    "value": "Nigerian",
+                    "status": "user_entered",
+                    "source": "User confirmed",
+                },
+                {
+                    "field_key": "identity.race_ethnicity",
+                    "value": "African American",
+                    "status": "user_entered",
+                    "source": "User confirmed",
+                },
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    origin = field_from_overview(body, "identity.national_origin")
+    identity = field_from_overview(body, "identity.race_ethnicity")
+    assert origin["value"] == "Nigerian"
+    assert origin["sensitive"] is True
+    assert identity["value"] == "African American"
+    assert identity["sensitive"] is True
+    assert field_from_overview(body, "identity.citizenship")["value"] is None
 
 
 def test_profile_rejects_ambiguous_enrollment_and_invalid_address(client):

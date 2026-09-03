@@ -44,6 +44,7 @@
 - Verified-source derivation for full name and graduation year
 - Structural address checks with external deliverability verification intentionally disconnected
 - Immutable readiness validation blocks current-resume and cross-field profile conflicts
+- Optional demographic self-identification and scholarship affiliations remain separate, sensitive, and user-confirmed
 
 ## Phase 7 — controlled submission (intentionally locked)
 

@@ -31,6 +31,20 @@ FIELD_DEFINITIONS = (
     FieldDefinition("identity.date_of_birth", "Date of birth", "identity", "date", sensitive=True),
     FieldDefinition("identity.citizenship", "Citizenship", "identity", important=True),
     FieldDefinition(
+        "identity.national_origin",
+        "National origin / heritage",
+        "identity",
+        sensitive=True,
+        help_text="Optional self-identification used only for local scholarship matching.",
+    ),
+    FieldDefinition(
+        "identity.race_ethnicity",
+        "Race / ethnicity",
+        "identity",
+        sensitive=True,
+        help_text="Optional self-identification used only for local scholarship matching.",
+    ),
+    FieldDefinition(
         "identity.residency",
         "Residency status (not your address)",
         "identity",
@@ -72,6 +86,20 @@ FIELD_DEFINITIONS = (
         options=("Full-time", "Part-time", "Not currently enrolled"),
         important=True,
     ),
+    FieldDefinition(
+        "affiliations.nsbe_membership",
+        "NSBE paid membership",
+        "affiliations",
+        options=("Paid active member", "Not a paid active member", "Unsure"),
+        help_text="NSBE states that scholarship applicants must be registered paid members.",
+    ),
+    FieldDefinition(
+        "affiliations.nsbe_region",
+        "NSBE region",
+        "affiliations",
+        options=("Region 1", "Region 2", "Region 3", "Region 4", "Region 5", "Region 6"),
+        help_text="Use the region shown in your NSBE account or chapter listing.",
+    ),
 )
 
 SECTION_TITLES = {
@@ -79,6 +107,7 @@ SECTION_TITLES = {
     "contact": "Contact",
     "address": "Mailing address",
     "education": "Education",
+    "affiliations": "Scholarship affiliations",
 }
 
 US_STATES = {
@@ -138,6 +167,15 @@ def normalize_profile_value(field_key: str, value: Any) -> Any:
         if len(digits) != 10:
             raise ValueError("Enter a 10-digit US phone number")
         return f"({digits[:3]}) {digits[3:6]}-{digits[6:]}"
+    if field_key == "identity.citizenship":
+        aliases = {
+            "american": "U.S. Citizen",
+            "american citizen": "U.S. Citizen",
+            "us citizen": "U.S. Citizen",
+            "u.s citizen": "U.S. Citizen",
+            "u.s. citizen": "U.S. Citizen",
+        }
+        return aliases.get(str(value).casefold(), value)
     if field_key == "address.state":
         state = str(value).strip()
         normalized = STATE_NAMES.get(state.casefold(), state.upper())
@@ -160,6 +198,12 @@ def normalize_profile_value(field_key: str, value: Any) -> Any:
         normalized = aliases.get(str(value).casefold(), options.get(str(value).casefold()))
         if normalized is None:
             raise ValueError("Choose Full-time, Part-time, or Not currently enrolled")
+        return normalized
+    if field_key in {"affiliations.nsbe_membership", "affiliations.nsbe_region"}:
+        options = {item.casefold(): item for item in FIELD_BY_KEY[field_key].options}
+        normalized = options.get(str(value).casefold())
+        if normalized is None:
+            raise ValueError(f"Choose one of: {', '.join(FIELD_BY_KEY[field_key].options)}")
         return normalized
     if field_key == "education.graduation_date":
         text = str(value)

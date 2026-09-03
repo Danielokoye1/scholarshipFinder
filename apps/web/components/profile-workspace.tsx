@@ -128,7 +128,7 @@ export function ProfileWorkspace({ initial }: { initial: ProfileOverview }) {
                         value={current.displayValue}
                         onChange={(event) => updateField(field.field_key, event.target.value)}
                         autoComplete={field.field_key.startsWith("address.") ? "off" : undefined}
-                        spellCheck={["education.institution", "education.degree", "education.major", "education.minor", "identity.citizenship", "identity.residency"].includes(field.field_key)}
+                        spellCheck={["education.institution", "education.degree", "education.major", "education.minor", "identity.citizenship", "identity.national_origin", "identity.race_ethnicity", "identity.residency"].includes(field.field_key)}
                       />
                     )}
                     {field.help_text ? <small>{field.help_text}</small> : null}

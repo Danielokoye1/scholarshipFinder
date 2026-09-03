@@ -125,6 +125,20 @@ def test_sensitive_requirements_override_domain_approval(client):
     assert review_assessment["status"] == "review_required"
     assert any("social_security_number" in reason for reason in review_assessment["reasons"])
 
+    commitment = ingest(
+        client,
+        name="Scholarship for Service",
+        source_url="https://directory.example.org/service",
+        application_url="https://apply.service.example/start",
+        requirements={"security_clearance": True, "service_commitment": True},
+    ).json()
+    commitment_assessment = client.get(
+        f"/api/safety/scholarships/{commitment['scholarship_id']}"
+    ).json()
+    assert commitment_assessment["status"] == "review_required"
+    assert any("security_clearance" in reason for reason in commitment_assessment["reasons"])
+    assert any("service_commitment" in reason for reason in commitment_assessment["reasons"])
+
     blocked = ingest(
         client,
         name="Fee Scholarship",
@@ -195,6 +209,7 @@ def test_unknown_and_failed_eligibility_have_distinct_terminal_workflow_states(c
     ).json()
     assert unknown["status"] == "needs_user_input"
     assert unknown["tasks"][0]["category"] == "verify_information"
+    assert "Cumulative GPA must be at least 3.0" in unknown["tasks"][0]["required_action"]
 
     assert set_gpa(client, 2.0).status_code == 200
     failed_payload = deepcopy(scholarship_payload())

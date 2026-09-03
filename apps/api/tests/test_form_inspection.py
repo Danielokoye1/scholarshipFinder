@@ -101,6 +101,50 @@ def test_field_plan_never_copies_profile_values_and_requires_verified_status():
     assert "private@example.com" not in serialized
 
 
+def test_demographic_labels_map_to_distinct_user_confirmed_profile_fields():
+    fields = [
+        raw_field(label="National origin"),
+        raw_field(ordinal=1, label="Race or ethnicity"),
+    ]
+    profile = [
+        ProfileField(
+            field_key="identity.national_origin",
+            value_json="Example heritage",
+            status="user_entered",
+            source="User confirmed",
+        ),
+        ProfileField(
+            field_key="identity.race_ethnicity",
+            value_json="Example identity",
+            status="user_entered",
+            source="User confirmed",
+        ),
+    ]
+
+    plan = build_field_plan(fields, profile, 0.9)
+
+    assert [item.profile_field_key for item in plan] == [
+        "identity.national_origin",
+        "identity.race_ethnicity",
+    ]
+    assert all(item.disposition == "manual_review" for item in plan)
+
+
+def test_nsbe_eligibility_fields_have_deterministic_profile_mappings():
+    fields = [
+        raw_field(label="NSBE paid membership"),
+        raw_field(ordinal=1, label="NSBE Region"),
+    ]
+
+    plan = build_field_plan(fields, [], 0.9)
+
+    assert [item.profile_field_key for item in plan] == [
+        "affiliations.nsbe_membership",
+        "affiliations.nsbe_region",
+    ]
+    assert all(item.disposition == "missing_profile_data" for item in plan)
+
+
 def test_playwright_inspection_uses_fixture_without_collecting_values():
     with fixture_server() as origin:
         result = inspect_application_page(

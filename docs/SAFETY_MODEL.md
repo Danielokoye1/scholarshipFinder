@@ -13,7 +13,7 @@ Every new application hostname begins at `review_required`. Approval requires al
 - Scholarship legitimacy screening is not blocked or awaiting review.
 - No sensitive requirement requires separate review or blocking.
 
-Punycode hostnames and unusual ports require review. Any application fee, bank login, bank credentials, payment requirement, gift card, or cryptocurrency request blocks the destination. SSNs, government IDs, passports, household income, financial information, bank account details, signatures, and attestations require individual review even when the domain is approved.
+Punycode hostnames and unusual ports require review. Any application fee, bank login, bank credentials, payment requirement, gift card, or cryptocurrency request blocks the destination. SSNs, government IDs, passports, household income, financial information, bank account details, signatures, attestations, security-clearance or background-check requirements, and employment or service commitments require individual review even when the domain is approved.
 
 ## Layered statuses
 

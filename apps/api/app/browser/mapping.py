@@ -60,7 +60,23 @@ LABEL_RULES: list[tuple[re.Pattern[str], str, float]] = [
     (re.compile(r"\b(class year|year in school|academic level)\b"), "education.class_year", 0.94),
     (re.compile(r"\b(enrollment status|student status)\b"), "education.enrollment_status", 0.94),
     (re.compile(r"\bcitizenship( status)?\b"), "identity.citizenship", 0.96),
+    (
+        re.compile(r"\b(national origin|cultural heritage|ancestry)\b"),
+        "identity.national_origin",
+        0.94,
+    ),
+    (
+        re.compile(r"\b(race|racial identity|ethnicity|ethnic identity)\b"),
+        "identity.race_ethnicity",
+        0.94,
+    ),
     (re.compile(r"\b(residency|resident state)\b"), "identity.residency", 0.94),
+    (
+        re.compile(r"\bnsbe (paid )?(membership|member status)\b"),
+        "affiliations.nsbe_membership",
+        0.97,
+    ),
+    (re.compile(r"\bnsbe region\b"), "affiliations.nsbe_region", 0.98),
 ]
 
 SENSITIVE_PATTERN = re.compile(
